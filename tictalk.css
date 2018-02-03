@@ -1,0 +1,69 @@
+* {
+  font-family: 'Roboto', sans-serif;
+  user-select: none;
+}
+
+body {
+  min-width: 300px;
+}
+
+/** HEADER **********************************************************/
+.header {
+  position: fixed;
+  top: 0px;
+  left: 0px;
+  width: 100%;
+
+  padding: 20px;
+
+  background-color: #607d8b;
+
+  font-weight: 500;
+  font-size: 150%;
+  line-height: 20px;
+  color: #FFF;
+  
+  z-index: 10;
+  box-shadow: 0 2px 3px rgba(0,0,0,0.16);
+}
+
+.header-button {
+  position: absolute;
+  top: 20px;
+  right: 62px;
+
+  line-height: 20px;
+}
+
+
+
+/** MATERIAL ICONS **************************************************/
+/* material icons is a font used for the icons/buttons on this page */
+.material-icons { cursor: pointer; }
+
+.material-icons.md-head        { color: rgba(0, 0, 0, 0.54);}
+.material-icons.md-head:hover   { color: rgba(0, 0, 0, 0.64); }
+.material-icons.md-head:active,
+.material-icons.active         { color: rgba(0, 0, 0, 0.84);}
+
+.material-icons.md-dark        { color: rgba(0, 0, 0, 0.54);}
+.material-icons.md-dark:hover   { color: #8eacbb; }
+.material-icons.md-dark:active,
+.material-icons.active         { color: #34515e;}
+
+.material-icons.md-18          { font-size: 18px;}
+.material-icons.md-15          { font-size: 15px;}
+.material-icons.md-12          { font-size: 12px;}
+
+.material-icons.md-lower       { position: relative; top: 0.14em}
+
+.material-icons.md-light       { color: rgb(255,255,255);}
+.material-icons.md-light:hover  { color: rgb(225,225,225);}
+.material-icons.md-light:active { color: rgb(205,205,205); }
+
+.material-icons.md-destructive:hover,
+.material-icons.md-dark.md-destructive:hover,
+.material-icons.md.light.md-destructive:hover { color: rgb(255,64,64); }
+.material-icons.md-destructive:active,
+.material-icons.md-dark.md-destructive:active,
+.material-icons.md.light.md-destructive:active { color: rgb(192,0,0); }
