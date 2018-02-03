@@ -7,18 +7,30 @@
 
 		<title>Tic Talk</title>
 
+		<!-- Style -->
 		<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
 		<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
+		<link rel="stylesheet" href="./fullcalendar/fullcalendar.min.css">
 		<link rel="stylesheet" href="./tictalk.css">
-		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+
+		<!-- Javascript -->
+		<script type="text/javascript"  src="./fullcalendar/lib/jquery.min.js"></script>
+		<script type="text/javascript"  src="./fullcalendar/lib/jquery-ui.min.js"></script>
+		<script type="text/javascript"  src="./fullcalendar/lib/moment.min.js"></script>
+		<script type="text/javascript"  src="./fullcalendar/fullcalendar.js"></script>
 		<script type="text/javascript" src="./tictalk.js"></script>
 
 	</head>
 
 	<body>
-		<div class="header"> Tic-Talk
-	      <div class="header-button"><i class="material-icons md-head" id="settings-open">settings</i></div>
+		<div class="header"> Tic Talk
+			<div class="header-button" title="Log In/Out" id="log-in-out"><i class="material-icons">account_circle</i></div>
+			<div class="header-button" title="Add To-Do" id="add-event">+</div>
+			<div class="header-button" title="Schedule Today" id="schedule-day"><i class="material-icons">format_list_numbered</i></div>
+	    </div>
+	    <div class="calendar-container">
+	    	<div id="calendar"></div>
 	    </div>
 	</body>
 </html>
