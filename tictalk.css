@@ -21,6 +21,12 @@ body {
   overflow: hidden;
 }
 
+.button {
+  transition:
+    background-color 0.1s 0s ease-in-out,
+    color            0.1s 0s ease-in-out;
+}
+
 /** HEADER **********************************************************/
 .header {
   position: absolute;
@@ -44,7 +50,6 @@ body {
 
 .header-button {
   float: right;
-
   font-size: 24px;
 
   line-height: 30px;
@@ -69,6 +74,98 @@ body {
 
 .header-button:active {
   background: rgba(139,0,50,0.66);
+}
+
+/** MODALS *********************************************************/
+.popup {
+  left: 50%;
+  margin: -250px 0 0 -32%;
+  opacity: 0;
+  position: absolute;
+  top: -50%;
+  display: block;
+  width: 65%;
+  border-radius: 2px;
+  box-sizing: border-box;
+  visibility: hidden;
+  transition: all .5s ease-in-out;
+}
+.popup.active {
+  opacity: 1;
+  top: 50%;
+  visibility: visible;
+}
+.popup-overlay {
+  visibility: hidden;
+  opacity: 0;
+  background-color: #000;
+  background: rgba(0,0,0,0.5);
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  
+  transition: all 0.25s ease-in-out;
+  transition-delay: .55s;
+
+  z-index: 100;
+}
+.popup.active > .popup-overlay { visibility:visible; opacity: 1 }
+
+.popup-container {
+  background: #FFF;
+  position: relative;
+
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.16);
+  border-radius: 2px;
+
+  z-index: 101;
+}
+.popup-header {
+  border: 0px solid #ddd; border-bottom-width: 1px;
+  border-radius: 2px 2px 0 0;
+
+  background-color: #8b0032;
+  
+  padding: 15px 15px;
+
+  color: white;
+  font-weight: 500;
+  font-size: 110%;
+}
+
+.popup-content {padding: 25px 15px 15px;}
+.popup-footer {
+  height: 40px;
+
+  font-size: 95%;
+
+  border: 0px solid #ddd; border-top-width: 1px;
+}
+
+.popup-footer-textbutton {
+  position: relative;
+  float: right;
+
+  color: #c1185b;
+
+  padding: 0px 15px;
+  border-radius: 5px;
+
+  font-size: 100%;
+  font-weight: 500;
+  line-height: 40px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.popup-footer-textbutton:hover {
+  background-color: rgba(0,0,0,0.1);
+}
+.popup-footer-textbutton:active {
+  color: #8b0032;
+  background-color: rgba(0,0,0,0.15);
 }
 
 /** BODY **********************************************************/

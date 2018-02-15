@@ -25,10 +25,59 @@
 
 	<body>
 		<div class="header"> Tic Talk
-			<div class="header-button" title="Log In/Out" id="log-in-out"><i class="material-icons">account_circle</i></div>
-			<div class="header-button" title="Add To-Do" id="add-event">+</div>
-			<div class="header-button" title="Schedule Today" id="schedule-day"><i class="material-icons">format_list_numbered</i></div>
+			<div class="header-button button" title="Log In/Out"     id="log-in"       data-popup="#log-in-popup">
+				<i class="material-icons">account_circle</i>
+			</div>
+			<div class="header-button button" title="Add To-Do"      id="add-event"    data-popup="#add-event-popup">+</div>
+			<div class="header-button button" title="Schedule Today" id="schedule-day" data-popup="#schedule-day-popup">
+				<i class="material-icons">format_list_numbered</i>
+			</div>
 	    </div>
+		
+		<div class="popup" id="log-in-popup">
+	    	<div class="popup-overlay"></div>
+	      	<div class="popup-container">
+	        	<div class="popup-header">
+	        		Account
+	        	</div>
+	        	<div class="popup-content"></div>
+	        	<div class="popup-footer">
+	        		<div class="popup-footer-textbutton button">SAVE</div>
+	        		<div class="popup-footer-textbutton button">DISCARD</div>
+	        	</div>
+	    	</div>
+	    </div>
+
+
+		<div class="popup" id="add-event-popup">
+			<div class="popup-overlay"></div>
+	      	<div class="popup-container">
+	        	<div class="popup-header">
+	        		Add Event
+	        	</div>
+	        	<div class="popup-content"></div>
+	        	<div class="popup-footer">
+	        		<div class="popup-footer-textbutton button">SAVE</div>
+	        		<div class="popup-footer-textbutton button">DISCARD</div>
+	        	</div>
+	    	</div>
+	    </div>
+
+	    <div class="popup" id="schedule-day-popup">
+	    	<div class="popup-overlay"></div>
+	      	<div class="popup-container">
+	        	<div class="popup-header">
+	        		Schedule Day
+	        	</div>
+	        	<div class="popup-content"></div>
+	        	<div class="popup-footer">
+	        		<div class="popup-footer-textbutton button">SAVE</div>
+	        		<div class="popup-footer-textbutton button">DISCARD</div>
+	        	</div>
+	    	</div>
+	    </div>
+
+
 	    <div class="calendar-container">
 	    	<div id="calendar"></div>
 	    </div>
