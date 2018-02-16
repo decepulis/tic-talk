@@ -1,26 +1,47 @@
+/*
+Light:   #f95688
+         rgba(249,86,136,1)
+Primary: #c1185b
+         rgba(193,24,91,1)
+Dark:    #8b0032
+         rgba(139,0,50,1)
+*/
+
+
 * {
   font-family: 'Roboto', sans-serif;
-  user-select: none;
+  -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
 }
 
 body {
   min-width: 300px;
+  height: 100%;
+
+  margin: 0; 
+  overflow: hidden;
+}
+
+.button {
+  transition:
+    background-color 0.1s 0s ease-in-out,
+    color            0.1s 0s ease-in-out;
 }
 
 /** HEADER **********************************************************/
 .header {
-  position: fixed;
+  position: absolute;
   top: 0px;
   left: 0px;
-  width: 100%;
+  right: 0px;
 
-  padding: 20px;
+  padding: 15px 20px;
 
-  background-color: #607d8b;
+  background-color: #c1185b;
 
   font-weight: 500;
-  font-size: 150%;
-  line-height: 20px;
+  font-size: 24px;
+  line-height: 30px;
+
   color: #FFF;
   
   z-index: 10;
@@ -28,42 +49,138 @@ body {
 }
 
 .header-button {
-  position: absolute;
-  top: 20px;
-  right: 62px;
+  float: right;
+  font-size: 24px;
 
-  line-height: 20px;
+  line-height: 30px;
+  width: 30px;
+  border-radius: 15px;
+  text-align: center;
+  cursor: pointer;
+
+  margin-right: 8px;
 }
 
+.header-button > .material-icons {
+  position: relative;
+  top: 2px;
 
+  font-size: 20px;
+}
 
-/** MATERIAL ICONS **************************************************/
-/* material icons is a font used for the icons/buttons on this page */
-.material-icons { cursor: pointer; }
+.header-button:hover {
+  background: rgba(139,0,50,0.33);
+}
 
-.material-icons.md-head        { color: rgba(0, 0, 0, 0.54);}
-.material-icons.md-head:hover   { color: rgba(0, 0, 0, 0.64); }
-.material-icons.md-head:active,
-.material-icons.active         { color: rgba(0, 0, 0, 0.84);}
+.header-button:active {
+  background: rgba(139,0,50,0.66);
+}
 
-.material-icons.md-dark        { color: rgba(0, 0, 0, 0.54);}
-.material-icons.md-dark:hover   { color: #8eacbb; }
-.material-icons.md-dark:active,
-.material-icons.active         { color: #34515e;}
+/** MODALS *********************************************************/
+.popup {
+  left: 50%;
+  margin: -250px 0 0 -32%;
+  opacity: 0;
+  position: absolute;
+  top: -50%;
+  display: block;
+  width: 65%;
+  border-radius: 2px;
+  box-sizing: border-box;
+  visibility: hidden;
+  transition: all .5s ease-in-out;
+}
+.popup.active {
+  opacity: 1;
+  top: 50%;
+  visibility: visible;
+}
+.popup-overlay {
+  visibility: hidden;
+  opacity: 0;
+  background-color: #000;
+  background: rgba(0,0,0,0.5);
+  height: 100%;
+  left: 0;
+  position: fixed;
+  top: 0;
+  width: 100%;
+  
+  transition: all 0.25s ease-in-out;
+  transition-delay: .55s;
 
-.material-icons.md-18          { font-size: 18px;}
-.material-icons.md-15          { font-size: 15px;}
-.material-icons.md-12          { font-size: 12px;}
+  z-index: 100;
+}
+.popup.active > .popup-overlay { visibility:visible; opacity: 1 }
 
-.material-icons.md-lower       { position: relative; top: 0.14em}
+.popup-container {
+  background: #FFF;
+  position: relative;
 
-.material-icons.md-light       { color: rgb(255,255,255);}
-.material-icons.md-light:hover  { color: rgb(225,225,225);}
-.material-icons.md-light:active { color: rgb(205,205,205); }
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.16);
+  border-radius: 2px;
 
-.material-icons.md-destructive:hover,
-.material-icons.md-dark.md-destructive:hover,
-.material-icons.md.light.md-destructive:hover { color: rgb(255,64,64); }
-.material-icons.md-destructive:active,
-.material-icons.md-dark.md-destructive:active,
-.material-icons.md.light.md-destructive:active { color: rgb(192,0,0); }
+  z-index: 101;
+}
+.popup-header {
+  border: 0px solid #ddd; border-bottom-width: 1px;
+  border-radius: 2px 2px 0 0;
+
+  background-color: #8b0032;
+  
+  padding: 15px 15px;
+
+  color: white;
+  font-weight: 500;
+  font-size: 110%;
+}
+
+.popup-content {padding: 25px 15px 15px;}
+.popup-footer {
+  height: 40px;
+
+  font-size: 95%;
+
+  border: 0px solid #ddd; border-top-width: 1px;
+}
+
+.popup-footer-textbutton {
+  position: relative;
+  float: right;
+
+  color: #c1185b;
+
+  padding: 0px 15px;
+  border-radius: 5px;
+
+  font-size: 100%;
+  font-weight: 500;
+  line-height: 40px;
+  text-align: center;
+  cursor: pointer;
+}
+
+.popup-footer-textbutton:hover {
+  background-color: rgba(0,0,0,0.1);
+}
+.popup-footer-textbutton:active {
+  color: #8b0032;
+  background-color: rgba(0,0,0,0.15);
+}
+
+/** BODY **********************************************************/
+.calendar-container {
+  position: absolute;
+  top: 60px; bottom: 0px; left: 0px; right: 0px;
+  
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 10px;
+}
+
+#calendar {
+  position: absolute;
+  left: 10px;
+  right: 10px;
+  top: 10px;
+}
