@@ -1,5 +1,6 @@
 // When the document loads, we execute this code
 $(document).ready(function(){ 
+	console.log("DEBUG: Document Loaded")
 	$('.header-button').click(function(){
 		var popup_id = $(this).attr('data-popup');
 		$(popup_id).addClass('active')
