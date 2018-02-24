@@ -13,18 +13,47 @@ Dark:    #8b0032
   -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
 }
 
-body {
+body, html {
   min-width: 300px;
   height: 100%;
 
   margin: 0; 
   overflow: hidden;
+
+  line-height: 1.5em;
 }
 
 .button {
   transition:
     background-color 0.1s 0s ease-in-out,
     color            0.1s 0s ease-in-out;
+}
+
+.button.destructive {
+  color: red;
+}
+
+.textbutton {
+  color: #c1185b;
+
+  border-radius: 5px;
+
+  font-size: 100%;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+}
+
+.textbutton:hover {
+  background-color: rgba(0,0,0,0.1);
+}
+.textbutton:active {
+  color: #8b0032;
+  background-color: rgba(0,0,0,0.15);
+}
+
+.hidden {
+  display: none;
 }
 
 /** HEADER **********************************************************/
@@ -90,6 +119,17 @@ body {
   visibility: hidden;
   transition: all .5s ease-in-out;
 }
+.popup.narrow {
+  width: 32%;
+  margin-left: -16%;
+}
+@media screen and (max-width: 800px) {
+  .popup.narrow {
+    width: 65%;
+    margin-left: -32%;
+  }
+}
+  
 .popup.active {
   opacity: 1;
   top: 50%;
@@ -142,30 +182,28 @@ body {
   font-size: 95%;
 
   border: 0px solid #ddd; border-top-width: 1px;
+
+  padding: 0 4px;
 }
 
-.popup-footer-textbutton {
+.popup-footer>.textbutton {
+  padding: 0px 15px;
+
   position: relative;
   float: right;
 
-  color: #c1185b;
-
-  padding: 0px 15px;
-  border-radius: 5px;
-
-  font-size: 100%;
-  font-weight: 500;
   line-height: 40px;
-  text-align: center;
-  cursor: pointer;
 }
 
-.popup-footer-textbutton:hover {
-  background-color: rgba(0,0,0,0.1);
+/** **/
+.add-event-field {
+  float: right;
 }
-.popup-footer-textbutton:active {
-  color: #8b0032;
-  background-color: rgba(0,0,0,0.15);
+
+.add-event-tip {
+  line-height: 1.2em;
+  font-size: 80%;
+  font-weight: 300;
 }
 
 /** BODY **********************************************************/

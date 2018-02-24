@@ -27,7 +27,7 @@
 				<i class="material-icons">account_circle</i>
 			</div>
 			<div class="header-button button" title="Add To-Do"      id="add-event"    data-popup="#add-event-popup">+</div>
-			<div class="header-button button" title="Schedule Today" id="schedule-day" data-popup="#schedule-day-popup">
+			<div class="header-button button" title="Schedule This Week" id="schedule-week" data-popup="#schedule-week-popup">
 				<i class="material-icons">format_list_numbered</i>
 			</div>
 	    </div>
@@ -40,37 +40,79 @@
 	        	</div>
 	        	<div class="popup-content"></div>
 	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button">SAVE</div>
-	        		<div class="popup-footer-textbutton button">DISCARD</div>
+	        		<div class="textbutton button" onclick="closePopup();">SAVE</div>
+	        		<div class="textbutton button" onclick="closePopup();">DISCARD</div>
 	        	</div>
 	    	</div>
 	    </div>
 
 
-		<div class="popup" id="add-event-popup">
+		<div class="popup narrow" id="add-event-popup">
 			<div class="popup-overlay"></div>
 	      	<div class="popup-container">
 	        	<div class="popup-header">
 	        		Add Event
 	        	</div>
-	        	<div class="popup-content"></div>
+
+	        	<div class="popup-content">
+              <div class="popup-content-row">
+                Task Title: 
+                <input class="add-event-field" type="text" id="task-title-field" placeholder="e.g. Calc HW #5">
+              </div>
+
+              <div class="popup-content-row">
+                Task Type:
+                <div class="add-event-field" id="task-type-field" style="display:inline-block;white-space:nowrap;">
+                  <select onchange="updateTaskTypeDropdown();">
+                    <option value="no-selection">Select...</option>
+                    <option>Sample Type</option>
+                    <option>Add New Task Type</option>
+                  </select>
+                </div>
+              </div>
+              <div class="popup-content-row hidden" id="new-task-type-row">
+                New Type:
+                <input class="add-event-field" type="text" id="new-task-type-field" placeholder="e.g. Weekly Calc HW">
+              </div>
+
+              <div class="popup-content-row">&nbsp;</div>
+
+              <div class="popup-content-row">
+                Usually Takes:
+                <i class="add-event-field" id="task-estimate-calc-field">0 Hours</i>
+              </div>
+
+              <div class="popup-content-row">
+                Your Estimate: 
+                <input class="add-event-field" type="number" min=0 id="task-estimate-given-field" placeholder="Hours">
+              </div>
+
+              <div class="popup-content-row">&nbsp;</div>
+              
+
+              <div class="popup-content-row">
+                Due Date:  
+                <input  class="add-event-field" type="date" id="task-due-date-field"> 
+              </div>
+            </div>
+
 	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button">SAVE</div>
-	        		<div class="popup-footer-textbutton button">DISCARD</div>
+	        		<div class="textbutton button save" onclick="saveAddEventDialogue();">SAVE</div>
+	        		<div class="textbutton button destructive" onclick="discardAddEventDialogue();">DISCARD</div>
 	        	</div>
 	    	</div>
 	    </div>
 
-	    <div class="popup" id="schedule-day-popup">
+	    <div class="popup" id="schedule-week-popup">
 	    	<div class="popup-overlay"></div>
 	      	<div class="popup-container">
 	        	<div class="popup-header">
-	        		Schedule Day
+	        		Schedule Week
 	        	</div>
 	        	<div class="popup-content"></div>
 	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button">SAVE</div>
-	        		<div class="popup-footer-textbutton button">DISCARD</div>
+	        		<div class="textbutton button" onclick="closePopup();">SAVE</div>
+	        		<div class="textbutton button" onclick="closePopup();">DISCARD</div>
 	        	</div>
 	    	</div>
 	    </div>
