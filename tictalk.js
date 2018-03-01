@@ -3,6 +3,17 @@ $(document).ready(function(){
 	console.log("DEBUG: Document Loaded")
 })
 
+// ** LOCALSTORAGE ***********************************************//
+// this function converts JSON into string to be entered into localStorage
+function addToLocalStorage(data) {
+  if (typeof data != "string") {data = JSON.stringify(data);}
+  return data;
+}
+// this function gets string from localStorage and converts it into JSON
+function getFromLocalStorage(key) {
+  return JSON.parse(localStorage.getItem(key));
+}
+
 // ** BUTTON BEHAVIOR ********************************************//
 $(document).ready(function(){
 	$('.header-button').click(function(){
@@ -13,6 +24,26 @@ $(document).ready(function(){
 
 function closePopup() {
 	$('.popup').each(function(){$(this).removeClass('active')})
+}
+
+function buildTaskTypeDropdown() {
+  // To do: clear the select list
+  // populate it with this template
+  // and between Select... and Add New Task Type
+  // add all the items stored in localstorage
+  // <select onchange="updateTaskTypeDropdown();">
+  //    <option value="no-selection">Select...</option>
+  //    <option>Sample Type</option>
+  //    <option>Add New Task Type</option>
+  // </select>
+
+  var types = getFromLocalStorage('task-types');
+  if (types != null) {
+    types.forEach(function(type){
+
+      $('#task-type-field>select>option[value=noselection]')
+    })
+  }
 }
 
 function updateTaskTypeDropdown() {
@@ -29,7 +60,16 @@ function saveAddEventDialogue() {
 	var type  = $('#task-type-field>select')[0].value;
 
 	if ($('#task-type-field>select')[0].value === "Add New Task Type") {
+    var types = getFromLocalStorage('task-types');
+    if (types == null) { types = []; }
+
 		var type = $('#new-task-type-field')[0].value;
+    // if type isn't already in array, add and save
+    if (types.indexOf(type) == -1) {
+      types.push(type);
+      addToLocalStorage(types);
+      buildTaskTypesDropdown();
+    }
 	} 
 
 	if (
