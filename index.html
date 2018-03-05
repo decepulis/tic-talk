@@ -7,7 +7,7 @@
 	<title>Tic Talk</title>
 
 	<!-- Style -->
-	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400i,500,700" rel="stylesheet">
 	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
 
 	<link rel="stylesheet" href="./fullcalendar/fullcalendar.min.css">
@@ -26,7 +26,7 @@
 			<div class="header-button button" title="Log In/Out"     id="log-in"       data-popup="#log-in-popup">
 				<i class="material-icons">account_circle</i>
 			</div>
-			<div class="header-button button" title="Add To-Do"      id="add-event"    data-popup="#add-event-popup">+</div>
+			<div class="header-button button" title="Add To-Do"      id="add-task"    data-popup="#add-task-popup">+</div>
 			<div class="header-button button" title="Schedule This Week" id="schedule-week" data-popup="#schedule-week-popup">
 				<i class="material-icons">format_list_numbered</i>
 			</div>
@@ -47,43 +47,49 @@
 	    </div>
 
 
-		<div class="popup narrow" id="add-event-popup">
+		<div class="popup narrow" id="add-task-popup">
 			<div class="popup-overlay"></div>
 	      	<div class="popup-container">
 	        	<div class="popup-header">
-	        		Add Event
+	        		Add Item to Calendar
 	        	</div>
+            <div class="popup-content">
+              <form>
+                <input type="radio" id="task-due-radio" name="add-item-content-radio" value="task-due" onchange="switchAddItemContent();" checked><label for= task-due-radio style="margin-right:10px">New Task Due</label>
+                <input type="radio" id="schedule-work-radio" name="add-item-content-radio" value="schedule-work" onchange="switchAddItemContent();"><label for="schedule-work-radio">New Scheduled Work</label> 
+              </form>
+            </div>
 
-	        	<div class="popup-content">
+	        	<div class="popup-content" id="new-task-due-content">
               <div class="popup-content-row">
                 Task Title: 
-                <input class="add-event-field" type="text" id="task-title-field" placeholder="e.g. Calc HW #5">
+                <input class="add-task-field" type="text" id="task-title-field" placeholder="e.g. Calc HW #5">
               </div>
 
               <div class="popup-content-row">
                 Task Type:
-                <div class="add-event-field" id="task-type-field" style="display:inline-block;white-space:nowrap;">
+                <div class="add-task-field" id="task-type-field" style="display:inline-block;white-space:nowrap;">
                   <select onchange="updateTaskTypeDropdown();">
                     <option value="no-selection">Select...</option>
-                    <option>Add New Task Type</option>
+                    <option value="new-task-type">Add New Task Type</option>
                   </select>
                 </div>
               </div>
               <div class="popup-content-row hidden" id="new-task-type-row">
                 New Type:
-                <input class="add-event-field" type="text" id="new-task-type-field" placeholder="e.g. Weekly Calc HW">
+                <input class="add-task-field" type="text" id="new-task-type-field" placeholder="e.g. Weekly Calc HW">
               </div>
 
               <div class="popup-content-row">&nbsp;</div>
 
               <div class="popup-content-row">
                 Usually Takes:
-                <i class="add-event-field" id="task-estimate-calc-field">0 Hours</i>
+                <i class="add-task-field" id="task-estimate-calc-field">0 Hours</i>
               </div>
 
               <div class="popup-content-row">
                 Your Estimate: 
-                <input class="add-event-field" type="number" min=0 id="task-estimate-given-field" placeholder="Hours">
+                <input class="add-task-field" type="number" min=0 id="task-estimate-given-field" placeholder="Hours">
               </div>
 
               <div class="popup-content-row">&nbsp;</div>
@@ -91,13 +97,55 @@
 
               <div class="popup-content-row">
                 Due Date:  
-                <input  class="add-event-field" type="date" id="task-due-date-field"> 
+                <input  class="add-task-field" type="date" id="task-due-date-field"> 
+              </div>
+            </div>
+
+            <div class="popup-content" id="new-scheduled-work-content" style="display:none">
+              <div class="popup-content-row">
+                Working on Which Task?
+                <div class="add-work-field" id="work-target-field" style="display:inline-block;white-space:nowrap;">
+                  <select onchange="updateWorkTargetDropdown();">
+                    <option value="no-selection">Select...</option>
+                    <option value="no-target">Not Working on a Task</option>
+                  </select>
+                </div>
+              </div>
+              <div class="popup-content-row hidden" id="no-target-work-row">
+                What Are You Working On?
+                <input class="add-work-field" type="text" id="no-target-work-field" placeholder="e.g. Robotics Club">
+              </div>
+
+              <div class="popup-content-row">&nbsp;</div>
+              
+              <div class="popup-content-row">
+                Scheduled On:  
+                <input  class="add-work-field" type="datetime-local" id="work-scheduled-for-field"> 
+              </div>
+              <div class="popup-content-row">
+                Scheduled Until:  
+                <input  class="add-work-field" type="datetime-local" id="work-scheduled-until-field" onchange="updateFromUntilToDuration()"> 
+              </div>
+              
+              <div class="popup-content-row">&nbsp;</div>
+              
+              <div class="popup-content-row">
+                Duration: 
+                <input class="add-work-field" type="number" min=0 id="work-estimate-given-field" placeholder="Hours" onchange="updateFromDurationToUntil()">
+              </div>
+              <div class="popup-content-row">
+                Your Estimate (Total):
+                <i class="add-work-field" id="work-estimate-calc-total-field">0 Hours</i>
+              </div>
+              <div class="popup-content-row">
+                Usually Takes (Total):
+                <i class="add-work-field" id="work-estimate-given-total-field">0 Hours</i>
               </div>
             </div>
 
 	        	<div class="popup-footer">
-	        		<div class="textbutton button save" onclick="saveAddEventDialogue();">SAVE</div>
-	        		<div class="textbutton button destructive" onclick="discardAddEventDialogue();">DISCARD</div>
+	        		<div class="textbutton button" onclick="saveAddTaskDialogue();">SAVE</div>
+	        		<div class="textbutton button" onclick="discardAddTaskDialogue();">CANCEL</div>
 	        	</div>
 	    	</div>
 	    </div>
@@ -184,7 +232,7 @@
         if (isSignedIn) {
           authorizeButton.style.display = 'none';
           signoutButton.style.display = 'block';
-          listUpcomingEvents();
+          listUpcomingtasks();
         } else {
           authorizeButton.style.display = 'block';
           signoutButton.style.display = 'none';
@@ -194,14 +242,14 @@
       /**
        *  Sign in the user upon button click.
        */
-       function handleAuthClick(event) {
+       function handleAuthClick(task) {
         gapi.auth2.getAuthInstance().signIn();
       }
 
       /**
        *  Sign out the user upon button click.
        */
-       function handleSignoutClick(event) {
+       function handleSignoutClick(task) {
         gapi.auth2.getAuthInstance().signOut();
       }
 
@@ -218,33 +266,33 @@
       }
 
       /**
-       * Print the summary and start datetime/date of the next ten events in
-       * the authorized user's calendar. If no events are found an
+       * Print the summary and start datetime/date of the next ten tasks in
+       * the authorized user's calendar. If no tasks are found an
        * appropriate message is printed.
        */
-       function listUpcomingEvents() {
-        gapi.client.calendar.events.list({
+       function listUpcomingtasks() {
+        gapi.client.calendar.tasks.list({
           'calendarId': 'primary',
           'timeMin': (new Date()).toISOString(),
           'showDeleted': false,
-          'singleEvents': true,
+          'singletasks': true,
           'maxResults': 10,
           'orderBy': 'startTime'
         }).then(function(response) {
-          var events = response.result.items;
-          appendPre('Upcoming events:');
+          var tasks = response.result.items;
+          appendPre('Upcoming tasks:');
 
-          if (events.length > 0) {
-            for (i = 0; i < events.length; i++) {
-              var event = events[i];
-              var when = event.start.dateTime;
+          if (tasks.length > 0) {
+            for (i = 0; i < tasks.length; i++) {
+              var task = tasks[i];
+              var when = task.start.dateTime;
               if (!when) {
-                when = event.start.date;
+                when = task.start.date;
               }
-              appendPre(event.summary + ' (' + when + ')')
+              appendPre(task.summary + ' (' + when + ')')
             }
           } else {
-            appendPre('No upcoming events found.');
+            appendPre('No upcoming tasks found.');
           }
         });
       }

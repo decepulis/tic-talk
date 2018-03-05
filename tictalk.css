@@ -9,7 +9,7 @@ Dark:    #8b0032
 
 
 * {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
 }
 
@@ -118,6 +118,8 @@ body, html {
   box-sizing: border-box;
   visibility: hidden;
   transition: all .5s ease-in-out;
+
+  z-index: 100;
 }
 .popup.narrow {
   width: 32%;
@@ -132,7 +134,7 @@ body, html {
   
 .popup.active {
   opacity: 1;
-  top: 50%;
+  top: 282px;
   visibility: visible;
 }
 .popup-overlay {
@@ -149,7 +151,7 @@ body, html {
   transition: all 0.25s ease-in-out;
   transition-delay: .55s;
 
-  z-index: 100;
+  z-index: 101;
 }
 .popup.active > .popup-overlay { visibility:visible; opacity: 1 }
 
@@ -160,7 +162,7 @@ body, html {
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.16);
   border-radius: 2px;
 
-  z-index: 101;
+  z-index: 102;
 }
 .popup-header {
   border: 0px solid #ddd; border-bottom-width: 1px;
@@ -196,14 +198,13 @@ body, html {
 }
 
 /** **/
-.add-event-field {
+.add-task-field, .add-work-field {
   float: right;
 }
 
-.add-event-tip {
-  line-height: 1.2em;
-  font-size: 80%;
-  font-weight: 300;
+.popup-content {
+  line-height: 1.5rem;
+  font-weight: 400;
 }
 
 /** BODY **********************************************************/
