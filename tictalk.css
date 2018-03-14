@@ -168,6 +168,15 @@ body {
   background-color: rgba(0,0,0,0.15);
 }
 
+/** USER INFO *****************************************************/
+.basic-profile {
+
+}
+
+.bp-text {
+
+}
+
 /** BODY **********************************************************/
 .calendar-container {
   position: absolute;
@@ -183,4 +192,8 @@ body {
   left: 10px;
   right: 10px;
   top: 10px;
+}
+
+.small-image {
+  /*width: 20%;*/
 }

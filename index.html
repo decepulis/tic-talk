@@ -23,7 +23,7 @@
 
 <body>
 	<div class="header"> Tic Talk
-			<div class="header-button button" title="Log In/Out"     id="log-in"       data-popup="#log-in-popup">
+			<div class="header-button button" title="User Account"     id="account"       data-popup="#account-popup">
 				<i class="material-icons">account_circle</i>
 			</div>
 			<div class="header-button button" title="Add To-Do"      id="add-event"    data-popup="#add-event-popup">+</div>
@@ -32,15 +32,22 @@
 			</div>
 	    </div>
 		
-		<div class="popup" id="log-in-popup">
+		<div class="popup" id="account-popup">
 	    	<div class="popup-overlay"></div>
 	      	<div class="popup-container">
 	        	<div class="popup-header">
 	        		Account
 	        	</div>
-	        	<div class="popup-content"></div>
+	        	<div class="popup-content">
+	        		<!-- Hey, FYI, the content in this div is all placeholder. -->
+	        		<img src="bupkis.jpg" class="small-image" id="bp-image">
+					<p class="basic-profile bp-text">
+						<div id="bp-name">This is where the name goes</div>
+	        			<div id="bp-email">This is where the email goes</div>
+	        		</p>
+	        	</div>
 	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button">SAVE</div>
+	        		<div class="popup-footer-textbutton button" id="signout-button">SIGN OUT</div>
 	        		<div class="popup-footer-textbutton button">DISCARD</div>
 	        	</div>
 	    	</div>
@@ -75,6 +82,27 @@
 	    	</div>
 	    </div>
 
+	    <div class="popup" id="authenticate-popup">
+	    	<div class="popup-overlay"></div>
+	      	<div class="popup-container">
+	        	<div class="popup-header">
+	        		Welcome to Tic Talk.
+	        	</div>
+				<div class="popup-content">
+	        	TODO: Slap a sweet logo here!
+	        	</div>
+	        	<div class="popup-content">Tic Talk is a web app for time management. Designed to help users get a better grasp on the work in their week, Tic Talk helps you schedule your tasks with suggested work times and duration estimates. Minimize your work frustration and maximize your free time with Tic Talk.</div>
+
+				<div class="popup-content">
+	        	Tic Talk works using Google Calendar integration. Please sign in with your Google account to continue. Tic Talk only accesses general user information and data in your specific Tic Talk calendar.
+	        	</div>
+	        	<div class="popup-footer">
+	        		<div class="popup-footer-textbutton button" id="signin-button">SIGN IN</div>
+	        		<!--div class="g-signin2" data-onsuccess="onSignIn"></div-->
+	        		<div class="popup-footer-textbutton button">CANCEL</div>
+	        	</div>
+	    	</div>
+	    </div>
 
 	    <div class="calendar-container">
 	    	<div id="calendar"></div>
@@ -82,12 +110,6 @@
 	</body>
 
 	<div>
-		<p>Google Calendar API Quickstart</p>
-
-		<!--Add buttons to initiate auth sequence and sign out-->
-		<button id="authorize-button" style="display: none;">Authorize</button>
-		<button id="signout-button" style="display: none;">Sign Out</button>
-
 		<pre id="content"></pre>
 	</div>
 
