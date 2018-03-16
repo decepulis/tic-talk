@@ -56,6 +56,10 @@ body, html {
   display: none;
 }
 
+.textdisabled {
+  color: rgba(0,0,0,0.33);
+}
+
 /** HEADER **********************************************************/
 .header {
   position: absolute;

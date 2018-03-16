@@ -15,6 +15,7 @@ function getFromLocalStorage(k) {
   return JSON.parse(localStorage.getItem(k));
 }
 
+$(document).ready(buildTaskTypesDropdown)
 function buildTaskTypesDropdown() {
   // <select onchange="updateTaskTypeDropdown();">
   var $select = $('#task-type-field>select');
@@ -62,17 +63,30 @@ function switchAddItemContent(){
 }
 
 function updateTaskTypeDropdown() {
-	if ($("#task-type-field>select")[0].value === "new-task-type") {
+	if ($("#task-type-field>select").val() === "new-task-type") {
 		$('#new-task-type-row').removeClass('hidden');
+    $('#task-estimate-calc-row').addClass('textdisabled');
 	}
-	else { $('#new-task-type-row').addClass('hidden'); }
+	else 
+  { 
+    $('#new-task-type-row').addClass('hidden');
+    $('#task-estimate-calc-row').removeClass('textdisabled'); 
+  }
 }
 
 function updateWorkTargetDropdown() {
-  if ($("#work-target-field>select").val() === "no-target") {
+  if ($("#work-target-field>select").val() === "no-target") 
+  {
     $('#no-target-work-row').removeClass('hidden');
+    $('#work-estimate-calc-total-row').addClass('textdisabled');
+    $('#work-estimate-given-total-row').addClass('textdisabled');
   }
-  else { $('#no-target-work-row').addClass('hidden'); }
+  else 
+  { 
+    $('#no-target-work-row').addClass('hidden');
+    $('#work-estimate-calc-total-row').removeClass('textdisabled');
+    $('#work-estimate-given-total-row').removeClass('textdisabled'); 
+  }
 
 }
 
@@ -108,9 +122,25 @@ function updateFromDurationToUntil(){
 
     var until   = start.clone().add(duration,'hours').format("YYYY-MM-DDTHH:mm");
     $("#work-scheduled-until-field").val(until)
-  }
+  } 
+}
 
-  
+function buildTaskSelectionDropdown() {
+  // <select onchange="updateWorkTargetDropdown();">
+  var $select = $('#work-target-field>select');
+  $select.empty();
+  // <option value="no-selection">Select...</option>
+  $('<option/>').attr('value',"no-selection").html("Select...").appendTo($select);
+  //    <option>Type</option>
+  var types = $('#calendar').fullCalendar( 'clientEvents',isDueFilter);
+  if (types != null) 
+  {
+    types.forEach(function(type){
+      $('<option/>').attr('value',type._id).html(type.title).appendTo($select)
+    })
+  }
+  //    <option>Add New Task Type</option>
+  $('<option/>').attr('value','no-target').html("Not Working on an Assignment").appendTo($select);
 }
 
 function saveAddTaskDialogue() {
@@ -149,8 +179,9 @@ function saveAddTaskDialogue() {
         }
       } 
 
-      var newEvent = new event({title: title, type:type, start:dueDate, givenEstimate:givenEstimate})
+      var newEvent = new event({title: title, type:type, start:dueDate, duration:givenEstimate})
       addNewEvent(newEvent);
+      buildTaskSelectionDropdown();
 
       closePopup();
       clearAddTaskDialogue();
@@ -219,12 +250,14 @@ function clearAddTaskDialogue() {
   $('#new-task-type-field').val("")
   $('#new-task-type-row').addClass('hidden'); 
 
-  $('#work-target-field').val("");
+  $('#work-target-field>select').val("no-selection");
   $("#work-scheduled-for-field").val(moment().format("YYYY-MM-DDTHH:mm"));
   $("#work-scheduled-until-field").val(moment().add(1,'hours').format("YYYY-MM-DDTHH:mm"));
   $("#work-estimate-given-field").val("1");
-  $('#work-estimate-given-total-field').html("0 Hours")
-  $('#work-estimate-calc-total-field').html("0 Hours")
+  $('#work-estimate-given-total-field').html("0 Hours");
+  $('#work-estimate-calc-total-field').html("0 Hours");
+  $('#no-target-work-field').val("")
+  $('#no-target-work-row').addClass('hidden')
 }
 
 // ** SCHEDULING FUNCTIONS *************************************** //
@@ -283,6 +316,9 @@ $(document).ready(function(){
 	        right: 'month,agendaWeek,agendaDay, prev,next'
 	     } 
     })
+
+  buildTaskSelectionDropdown(); // this needs to happen here becuase
+                                // it can only run after calendar exists
 })
 
 // calcEstimate is how we provide users with our estimate for each task type
@@ -298,9 +334,10 @@ function getCalcEstimate(type) {
 	return hours;
 }
 
+
 function addNewEvent(eventToAdd) {
 	// 1. Add Event to fullCalendar
-	$('#calendar').fullCalendar('renderEvent', eventToAdd);
+	$('#calendar').fullCalendar('renderEvent', eventToAdd, true);
   $('#calendar').fullCalendar('render');
 
 	// 2. Add Event to Google Calendar
@@ -315,11 +352,15 @@ $(document).ready(buildCalcEstimateIndex)
 
 function event(newEvent) {
 
+  console.log(newEvent)
+  console.log(newEvent.duration)
+  console.log(typeof newEvent.duration)
+
 	this.title    = newEvent.title;
 	this.start    = moment(newEvent.start); 
 	this.editable = true;
 
-	if (typeof this.duration == undefined) // this is our flag indicating a due item or a work item
+	if (newEvent.duration !== undefined) // this is our flag indicating a due item or a work item
 		{ 
       this.allDay = true; 
       this.isDue  = true;

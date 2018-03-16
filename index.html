@@ -55,7 +55,7 @@
 	        	</div>
             <div class="popup-content">
               <form>
-                <input type="radio" id="task-due-radio" name="add-item-content-radio" value="task-due" onchange="switchAddItemContent();" checked><label for= task-due-radio style="margin-right:10px">New Task Due</label>
+                <input type="radio" id="task-due-radio" name="add-item-content-radio" value="task-due" onchange="switchAddItemContent();" checked><label for= task-due-radio style="margin-right:10px">New Assignment Due</label>
                 <input type="radio" id="schedule-work-radio" name="add-item-content-radio" value="schedule-work" onchange="switchAddItemContent();"><label for="schedule-work-radio">New Scheduled Work</label> 
               </form>
             </div>
@@ -82,7 +82,7 @@
 
               <div class="popup-content-row">&nbsp;</div>
 
-              <div class="popup-content-row">
+              <div class="popup-content-row" id="task-estimate-calc-row">
                 Usually Takes:
                 <i class="add-task-field" id="task-estimate-calc-field">0 Hours</i>
               </div>
@@ -103,11 +103,11 @@
 
             <div class="popup-content" id="new-scheduled-work-content" style="display:none">
               <div class="popup-content-row">
-                Working on Which Task?
+                Working on Which Assignment?
                 <div class="add-work-field" id="work-target-field" style="display:inline-block;white-space:nowrap;">
                   <select onchange="updateWorkTargetDropdown();">
                     <option value="no-selection">Select...</option>
-                    <option value="no-target">Not Working on a Task</option>
+                    <option value="no-target">Not Working on an Assignment</option>
                   </select>
                 </div>
               </div>
@@ -133,11 +133,11 @@
                 Duration: 
                 <input class="add-work-field" type="number" min=0 id="work-estimate-given-field" placeholder="Hours" onchange="updateFromDurationToUntil()">
               </div>
-              <div class="popup-content-row">
+              <div class="popup-content-row" id="work-estimate-calc-total-row">
                 Your Estimate (Total):
                 <i class="add-work-field" id="work-estimate-calc-total-field">0 Hours</i>
               </div>
-              <div class="popup-content-row">
+              <div class="popup-content-row" id="work-estimate-given-total-row">
                 Usually Takes (Total):
                 <i class="add-work-field" id="work-estimate-given-total-field">0 Hours</i>
               </div>
