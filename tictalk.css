@@ -9,22 +9,55 @@ Dark:    #8b0032
 
 
 * {
-  font-family: 'Roboto', sans-serif;
+  font-family: 'Montserrat', sans-serif;
   -webkit-user-select: none; -moz-user-select: none; -ms-user-select: none; user-select: none;
 }
 
-body {
+body, html {
   min-width: 300px;
   height: 100%;
 
   margin: 0; 
   overflow: hidden;
+
+  line-height: 1.5em;
 }
 
 .button {
   transition:
     background-color 0.1s 0s ease-in-out,
     color            0.1s 0s ease-in-out;
+}
+
+.button.destructive {
+  color: red;
+}
+
+.textbutton {
+  color: #c1185b;
+
+  border-radius: 5px;
+
+  font-size: 100%;
+  font-weight: 500;
+  text-align: center;
+  cursor: pointer;
+}
+
+.textbutton:hover {
+  background-color: rgba(0,0,0,0.1);
+}
+.textbutton:active {
+  color: #8b0032;
+  background-color: rgba(0,0,0,0.15);
+}
+
+.hidden {
+  display: none;
+}
+
+.textdisabled {
+  color: rgba(0,0,0,0.33);
 }
 
 /** HEADER **********************************************************/
@@ -89,10 +122,23 @@ body {
   box-sizing: border-box;
   visibility: hidden;
   transition: all .5s ease-in-out;
+
+  z-index: 100;
 }
+.popup.narrow {
+  width: 32%;
+  margin-left: -16%;
+}
+@media screen and (max-width: 800px) {
+  .popup.narrow {
+    width: 65%;
+    margin-left: -32%;
+  }
+}
+  
 .popup.active {
   opacity: 1;
-  top: 50%;
+  top: 282px;
   visibility: visible;
 }
 .popup-overlay {
@@ -109,7 +155,7 @@ body {
   transition: all 0.25s ease-in-out;
   transition-delay: .55s;
 
-  z-index: 100;
+  z-index: 101;
 }
 .popup.active > .popup-overlay { visibility:visible; opacity: 1 }
 
@@ -120,7 +166,7 @@ body {
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.16);
   border-radius: 2px;
 
-  z-index: 101;
+  z-index: 102;
 }
 .popup-header {
   border: 0px solid #ddd; border-bottom-width: 1px;
@@ -142,30 +188,27 @@ body {
   font-size: 95%;
 
   border: 0px solid #ddd; border-top-width: 1px;
+
+  padding: 0 4px;
 }
 
-.popup-footer-textbutton {
+.popup-footer>.textbutton {
+  padding: 0px 15px;
+
   position: relative;
   float: right;
 
-  color: #c1185b;
-
-  padding: 0px 15px;
-  border-radius: 5px;
-
-  font-size: 100%;
-  font-weight: 500;
   line-height: 40px;
-  text-align: center;
-  cursor: pointer;
 }
 
-.popup-footer-textbutton:hover {
-  background-color: rgba(0,0,0,0.1);
+/** **/
+.add-task-field, .add-work-field {
+  float: right;
 }
-.popup-footer-textbutton:active {
-  color: #8b0032;
-  background-color: rgba(0,0,0,0.15);
+
+.popup-content {
+  line-height: 1.5rem;
+  font-weight: 400;
 }
 
 /** USER INFO *****************************************************/

@@ -1,138 +1,235 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-	<meta charset="utf-8">
-	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-	<title>Tic Talk</title>
-
-	<!-- Style -->
-	<link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500" rel="stylesheet">
-	<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-
-	<link rel="stylesheet" href="./fullcalendar/fullcalendar.min.css">
-	<link rel="stylesheet" href="./tictalk.css">
-
-	<!-- Javascript -->
-	<script type="text/javascript"  src="./fullcalendar/lib/jquery.min.js"></script>
-	<script type="text/javascript"  src="./fullcalendar/lib/jquery-ui.min.js"></script>
-	<script type="text/javascript"  src="./fullcalendar/lib/moment.min.js"></script>
-	<script type="text/javascript"  src="./fullcalendar/fullcalendar.js"></script>
-	<script type="text/javascript" src="./tictalk.js"></script>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <title>Tic Talk</title>
+    <!-- Style -->
+    <link href="https://fonts.googleapis.com/css?family=Montserrat:300,300i,400i,500,700" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <link rel="stylesheet" href="./fullcalendar/fullcalendar.min.css">
+    <link rel="stylesheet" href="./tictalk.css">
+    <!-- Javascript -->
+    <script type="text/javascript" src="./fullcalendar/lib/jquery.min.js"></script>
+    <script type="text/javascript" src="./fullcalendar/lib/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="./fullcalendar/lib/moment.min.js"></script>
+    <script type="text/javascript" src="./fullcalendar/fullcalendar.js"></script>
+    <script type="text/javascript" src="./tictalk.js" \></script>
 </head>
 
 <body>
 	<div class="header"> Tic Talk
-			<div class="header-button button" title="User Account"     id="account"       data-popup="#account-popup">
-				<i class="material-icons">account_circle</i>
-			</div>
-			<div class="header-button button" title="Add To-Do"      id="add-event"    data-popup="#add-event-popup">+</div>
-			<div class="header-button button" title="Schedule Today" id="schedule-day" data-popup="#schedule-day-popup">
-				<i class="material-icons">format_list_numbered</i>
-			</div>
-	    </div>
-		
-		<div class="popup" id="account-popup">
-	    	<div class="popup-overlay"></div>
-	      	<div class="popup-container">
-	        	<div class="popup-header">
-	        		Account
-	        	</div>
-	        	<div class="popup-content">
-	        		<!-- Hey, FYI, the content in this div is all placeholder. -->
-	        		<img src="bupkis.jpg" class="small-image" id="bp-image">
-					<p class="basic-profile bp-text">
-						<div id="bp-name">This is where the name goes</div>
-	        			<div id="bp-email">This is where the email goes</div>
-	        		</p>
-	        	</div>
-	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button" id="signout-button">SIGN OUT</div>
-	        		<div class="popup-footer-textbutton button">DISCARD</div>
-	        	</div>
-	    	</div>
-	    </div>
+		<div class="header-button button" title="User Account"     id="account"       data-popup="#account-popup">
+			<i class="material-icons">account_circle</i>
+		</div>
+        <div class="header-button button" title="Add To-Do" id="add-task" data-popup="#add-task-popup">+</div>
+        <div class="header-button button" title="Schedule This Week" id="schedule-week" data-popup="#schedule-week-popup">
+			<i class="material-icons">format_list_numbered</i>
+		</div>
+    </div>
+	
+	<div class="popup" id="account-popup">
+    	<div class="popup-overlay"></div>
+      	<div class="popup-container">
+        	<div class="popup-header">
+        		Account
+        	</div>
+        	<div class="popup-content">
+        		<!-- Hey, FYI, the content in this div is all placeholder. -->
+        		<img src="bupkis.jpg" class="small-image" id="bp-image">
+				<p class="basic-profile bp-text">
+					<div id="bp-name">This is where the name goes</div>
+        			<div id="bp-email">This is where the email goes</div>
+        		</p>
+        	</div>
+        	<div class="popup-footer">
+        		<div class="popup-footer-textbutton button" id="signout-button">SIGN OUT</div>
+        		<div class="popup-footer-textbutton button">DISCARD</div>
+        	</div>
+    	</div>
+    </div>
 
+    <div class="popup narrow" id="add-task-popup">
+        <div class="popup-overlay"></div>
+        <div class="popup-container">
+            <div class="popup-header">
+                Add Item to Calendar
+            </div>
+            <div class="popup-content">
+                <form>
+                    <input type="radio" id="task-due-radio" name="add-item-content-radio" value="task-due" onchange="switchAddItemContent();" checked>
+                    <label for=t ask-due-radio style="margin-right:10px">New Assignment Due</label>
+                    <input type="radio" id="schedule-work-radio" name="add-item-content-radio" value="schedule-work" onchange="switchAddItemContent();">
+                    <label for="schedule-work-radio">New Scheduled Work</label>
+                </form>
+            </div>
+            <div class="popup-content" id="new-task-due-content">
+                <div class="popup-content-row">
+                    Task Title:
+                    <input class="add-task-field" type="text" id="task-title-field" placeholder="e.g. Calc HW #5">
+                </div>
+                <div class="popup-content-row">
+                    Task Type:
+                    <div class="add-task-field" id="task-type-field" style="display:inline-block;white-space:nowrap;">
+                        <select onchange="updateTaskTypeDropdown();">
+                            <option value="no-selection">Select...</option>
+                            <option value="new-task-type">Add New Task Type</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="popup-content-row hidden" id="new-task-type-row">
+                    New Type:
+                    <input class="add-task-field" type="text" id="new-task-type-field" placeholder="e.g. Weekly Calc HW">
+                </div>
+                <div class="popup-content-row">&nbsp;</div>
+                <div class="popup-content-row" id="task-estimate-calc-row">
+                    Usually Takes:
+                    <i class="add-task-field" id="task-estimate-calc-field">0 Hours</i>
+                </div>
+                <div class="popup-content-row">
+                    Your Estimate:
+                    <input class="add-task-field" type="number" min=0 id="task-estimate-given-field" placeholder="Hours">
+                </div>
+                <div class="popup-content-row">&nbsp;</div>
+                <div class="popup-content-row">
+                    Due Date:
+                    <input class="add-task-field" type="date" id="task-due-date-field">
+                </div>
+            </div>
+            <div class="popup-content" id="new-scheduled-work-content" style="display:none">
+                <div class="popup-content-row">
+                    Working on Which Assignment?
+                    <div class="add-work-field" id="work-target-field" style="display:inline-block;white-space:nowrap;">
+                        <select onchange="updateWorkTargetDropdown();">
+                            <option value="no-selection">Select...</option>
+                            <option value="no-target">Not Working on an Assignment</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="popup-content-row hidden" id="no-target-work-row">
+                    What Are You Working On?
+                    <input class="add-work-field" type="text" id="no-target-work-field" placeholder="e.g. Robotics Club">
+                </div>
+                <div class="popup-content-row">&nbsp;</div>
+                <div class="popup-content-row">
+                    Scheduled On:
+                    <input class="add-work-field" type="datetime-local" id="work-scheduled-for-field">
+                </div>
+                <div class="popup-content-row">
+                    Scheduled Until:
+                    <input class="add-work-field" type="datetime-local" id="work-scheduled-until-field" onchange="updateFromUntilToDuration()">
+                </div>
+                <div class="popup-content-row">&nbsp;</div>
+                <div class="popup-content-row">
+                    Duration:
+                    <input class="add-work-field" type="number" min=0 id="work-estimate-given-field" placeholder="Hours" onchange="updateFromDurationToUntil()">
+                </div>
+                <div class="popup-content-row" id="work-estimate-calc-total-row">
+                    Your Estimate (Total):
+                    <i class="add-work-field" id="work-estimate-calc-total-field">0 Hours</i>
+                </div>
+                <div class="popup-content-row" id="work-estimate-given-total-row">
+                    Usually Takes (Total):
+                    <i class="add-work-field" id="work-estimate-given-total-field">0 Hours</i>
+                </div>
+            </div>
+            <div class="popup-footer">
+                <div class="textbutton button" onclick="saveAddTaskDialogue();">SAVE</div>
+                <div class="textbutton button" onclick="discardAddTaskDialogue();">CANCEL</div>
+            </div>
+        </div>
+    </div>
 
-		<div class="popup" id="add-event-popup">
-			<div class="popup-overlay"></div>
-	      	<div class="popup-container">
-	        	<div class="popup-header">
-	        		Add Event
-	        	</div>
-	        	<div class="popup-content"></div>
-	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button">SAVE</div>
-	        		<div class="popup-footer-textbutton button">DISCARD</div>
-	        	</div>
-	    	</div>
-	    </div>
+    <div class="popup" id="schedule-week-popup">
+        <div class="popup-overlay"></div>
+        <div class="popup-container">
+            <div class="popup-header">
+                Plan Your Week
+            </div>
+            <div class="popup-content"></div>
+            <div class="popup-footer">
+                <div class="textbutton button" onclick="closePopup();">SAVE</div>
+                <div class="textbutton button" onclick="closePopup();">DISCARD</div>
+            </div>
+        </div>
+    </div>
 
-	    <div class="popup" id="schedule-day-popup">
-	    	<div class="popup-overlay"></div>
-	      	<div class="popup-container">
-	        	<div class="popup-header">
-	        		Schedule Day
-	        	</div>
-	        	<div class="popup-content"></div>
-	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button">SAVE</div>
-	        		<div class="popup-footer-textbutton button">DISCARD</div>
-	        	</div>
-	    	</div>
-	    </div>
+    <div class="popup" id="event-detail-popup">
+        <div class="popup-overlay"></div>
+        <div class="popup-container">
+            <div class="popup-header" id="event-detail-title">
+            </div>
+            <div class="popup-content">
+              <div class="popup-content-row" id="event-detail-type">
+              </div>
+              <div class="popup-content-row" id="event-detail-due">
+              </div>
+              <div class="popup-content-row">
+                Usually Takes:&nbsp;
+                <i id="event-detail-calc-estimate"></i>
+              </div>
+              <div class="popup-content-row">
+                Your Estimate:&nbsp;
+                 <i id="event-detail-given-estimate"></i>
+              </div>
+              <div class="popup-content-row" id="event-detail-work">
+              </div>
+            </div>
+            <div class="popup-footer">
+                <div class="textbutton button" onclick="closePopup();">CLOSE</div>
+            </div>
+        </div>
+    </div>
 
-	    <div class="popup" id="authenticate-popup">
-	    	<div class="popup-overlay"></div>
-	      	<div class="popup-container">
-	        	<div class="popup-header">
-	        		Welcome to Tic Talk.
-	        	</div>
-				<div class="popup-content">
-	        	TODO: Slap a sweet logo here!
-	        	</div>
-	        	<div class="popup-content">Tic Talk is a web app for time management. Designed to help users get a better grasp on the work in their week, Tic Talk helps you schedule your tasks with suggested work times and duration estimates. Minimize your work frustration and maximize your free time with Tic Talk.</div>
+    <div class="popup" id="authenticate-popup">
+    	<div class="popup-overlay"></div>
+      	<div class="popup-container">
+        	<div class="popup-header">
+        		Welcome to Tic Talk.
+        	</div>
+			<div class="popup-content">
+        	TODO: Slap a sweet logo here!
+        	</div>
+        	<div class="popup-content">Tic Talk is a web app for time management. Designed to help users get a better grasp on the work in their week, Tic Talk helps you schedule your tasks with suggested work times and duration estimates. Minimize your work frustration and maximize your free time with Tic Talk.</div>
 
-				<div class="popup-content">
-	        	Tic Talk works using Google Calendar integration. Please sign in with your Google account to continue. Tic Talk only accesses general user information and data in your specific Tic Talk calendar.
-	        	</div>
-	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button" id="signin-button">SIGN IN</div>
-	        		<div class="popup-footer-textbutton button">CANCEL</div>
-	        	</div>
-	    	</div>
-	    </div>
+			<div class="popup-content">
+        	Tic Talk works using Google Calendar integration. Please sign in with your Google account to continue. Tic Talk only accesses general user information and data in your specific Tic Talk calendar.
+        	</div>
+        	<div class="popup-footer">
+        		<div class="popup-footer-textbutton button" id="signin-button">SIGN IN</div>
+        		<div class="popup-footer-textbutton button">CANCEL</div>
+        	</div>
+    	</div>
+    </div>
 
-	    <div class="popup" id="create-calendar-popup">
-	    	<div class="popup-overlay"></div>
-	      	<div class="popup-container">
-	        	<div class="popup-header">
-	        		Create a Calendar
-	        	</div>
-				<div class="popup-content">
-	        	Tic Talk works using a specific calendar on your your account. This calendar will store all of your events scheduled by Tic Talk, with suggesting work times and duration estimates.
-	        	</div>
-				<div class="popup-content">
-	        	It looks like you don't have a calendar for Tic Talk yet. Please press the button below to let Tic Talk create a calendar. Note that Tic Talk needs this calendar to function. If you do not create a calendar, you won't be able to use this web app.
-	        	</div>
-	        	<div class="popup-footer">
-	        		<div class="popup-footer-textbutton button" id="create-calendar-button">CREATE CALENDAR</div>
-	        		<div class="popup-footer-textbutton button">CANCEL</div>
-	        	</div>
-	    	</div>
-	    </div>
+    <div class="popup" id="create-calendar-popup">
+    	<div class="popup-overlay"></div>
+      	<div class="popup-container">
+        	<div class="popup-header">
+        		Create a Calendar
+        	</div>
+			<div class="popup-content">
+        	Tic Talk works using a specific calendar on your your account. This calendar will store all of your events scheduled by Tic Talk, with suggesting work times and duration estimates.
+        	</div>
+			<div class="popup-content">
+        	It looks like you don't have a calendar for Tic Talk yet. Please press the button below to let Tic Talk create a calendar. Note that Tic Talk needs this calendar to function. If you do not create a calendar, you won't be able to use this web app.
+        	</div>
+        	<div class="popup-footer">
+        		<div class="popup-footer-textbutton button" id="create-calendar-button">CREATE CALENDAR</div>
+        		<div class="popup-footer-textbutton button">CANCEL</div>
+        	</div>
+    	</div>
+    </div>
 
-	    <div class="calendar-container">
-	    	<div id="calendar"></div>
-	    </div>
-	</body>
-
-	<div>
-		<pre id="content"></pre>
-	</div>
-
-	<!-- This below scriptis all Google authorization-->
-	<script type="text/javascript" src="./googleauth.js"></script>
-	<script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+    <div class="calendar-container">
+        <div id="calendar"></div>
+    </div>
 </body>
+
+<!-- This below scriptis all Google authorization-->
+<script type="text/javascript" src="./googleauth.js">
+<script async defer src="https://apis.google.com/js/api.js" onload="this.onload=function(){};handleClientLoad()" onreadystatechange="if (this.readyState === 'complete') this.onload()"></script>
+</body>
+
 </html>
