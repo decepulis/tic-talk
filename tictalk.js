@@ -63,7 +63,8 @@ function switchAddItemContent(){
   }
 }
 
-function updateTaskTypeDropdown() {
+function updateTaskSchedulePopup() {
+  // toggle input box based on user selection
 	if ($("#task-type-field>select").val() === "new-task-type") {
 		$('#new-task-type-row').removeClass('hidden');
     $('#task-estimate-calc-row').addClass('textdisabled');
@@ -72,21 +73,39 @@ function updateTaskTypeDropdown() {
   { 
     $('#new-task-type-row').addClass('hidden');
     $('#task-estimate-calc-row').removeClass('textdisabled'); 
+    // also update "usually takes" and stuff
+    $("#task-estimate-calc-field").html(getCalcEstimate($("#task-type-field>select").val()))
   }
+
 }
 
-function updateWorkTargetDropdown() {
+function updateWorkSchedulePopup() {
+  // toggle input box based on user selection
   if ($("#work-target-field>select").val() === "no-target") 
   {
     $('#no-target-work-row').removeClass('hidden');
+    $('#work-estimate-scheduled-total-row').addClass('textdisabled');
     $('#work-estimate-calc-total-row').addClass('textdisabled');
     $('#work-estimate-given-total-row').addClass('textdisabled');
   }
   else 
   { 
     $('#no-target-work-row').addClass('hidden');
+    $('#work-estimate-scheduled-total-row').removeClass('textdisabled');
     $('#work-estimate-calc-total-row').removeClass('textdisabled');
     $('#work-estimate-given-total-row').removeClass('textdisabled'); 
+
+    // and update estimates based off of the selected due assignment
+    var target = $("#work-target-field>select").val();
+    var targetEvent = $('#calendar').fullCalendar('clientEvents',target)[0]
+    // cycle through all scheduled work and sum it all up
+    var sum = parseFloat($('#work-estimate-given-field').val());
+    Object.keys(targetEvent.workEvents).forEach(function(id) {
+      sum += targetEvent.workEvents[id];
+    })
+    $('#work-estimate-scheduled-total-field').html(sum);
+    $('#work-estimate-calc-total-field').html(targetEvent.calcEstimate);
+    $('#work-estimate-given-total-field').html(targetEvent.givenEstimate);
   }
 
 }
@@ -107,6 +126,8 @@ function updateFromUntilToDuration() {
     var duration = moment.duration(until.diff(start)).asHours()
     $("#work-estimate-given-field").val(duration)
   }
+
+  updateWorkSchedulePopup();
 }
 
 function updateFromDurationToUntil(){
@@ -124,7 +145,11 @@ function updateFromDurationToUntil(){
     var until   = start.clone().add(duration,'hours').format("YYYY-MM-DDTHH:mm");
     $("#work-scheduled-until-field").val(until)
   } 
+
+  updateWorkSchedulePopup();
 }
+
+function updateFromStartToUntil() {}
 
 function buildTaskSelectionDropdown() {
   // <select onchange="updateWorkTargetDropdown();">
@@ -180,7 +205,7 @@ function saveAddTaskDialogue() {
         }
       } 
 
-      var newEvent = new event({title: title, type:type, start:dueDate, duration:givenEstimate})
+      var newEvent = new event({title: title, type:type, start:dueDate, givenEstimate:givenEstimate})
       addNewEvent(newEvent);
       buildTaskSelectionDropdown();
 
@@ -246,7 +271,7 @@ function clearAddTaskDialogue() {
 
   $('#task-title-field').val("");
   $('#task-estimate-given-field').val("");
-  $('#task-estimate-calc-field').html("0 Hours")
+  $('#task-estimate-calc-field').html("0")
   $('#task-due-date-field').val(moment().add(1,'week').format("YYYY-MM-DD"));
   $('#task-type-field>select').val("no-selection");
   $('#new-task-type-field').val("")
@@ -256,8 +281,9 @@ function clearAddTaskDialogue() {
   $("#work-scheduled-for-field").val(moment().format("YYYY-MM-DDTHH:mm"));
   $("#work-scheduled-until-field").val(moment().add(1,'hours').format("YYYY-MM-DDTHH:mm"));
   $("#work-estimate-given-field").val("1");
-  $('#work-estimate-given-total-field').html("0 Hours");
-  $('#work-estimate-calc-total-field').html("0 Hours");
+  $('#work-estimate-scheduled-total-field').html("0"); // sum of all stuff
+  $('#work-estimate-given-total-field').html("0");     // given estimate for all stuff
+  $('#work-estimate-calc-total-field').html("0");      // our estimate for all stuff
   $('#no-target-work-field').val("")
   $('#no-target-work-row').addClass('hidden')
 }
@@ -274,34 +300,11 @@ $(document).ready(function(){
       	height: ($(window).height()-80),
 
         eventClick: function(event, jsEvent, view) {
-          if (event.isDue) {
-            console.log(event)
-            $('#event-detail-title').html(event.shortTitle)
-            $('#event-detail-type').html(event.type)
-            $('#event-detail-due').html(event.start.format())
-            $('#event-detail-given-estimate').html(event.givenEstimate)
-            $('#event-detail-calc-estimate').html(event.calcEstimate)
-            $('#event-detail-work').empty()
-            event.workEvents.forEach(function(id) {
-              var workEvent = $("#calendar").fullCalendar('clientEvents', id)[0];
-              var duration  = moment.duration(workEvent.end.diff(workEvent.start)).hours();
-
-              $('#event-detail-work').append(
-                $("<div>").html(duration + " hours on " + workEvent.start.format('ddd MM/DD'))
-              )
-            })
-
-            $('#event-detail-popup').addClass('active')
-          }
+          eventPopup(event,jsEvent,view);
         },
 
         eventRender: function(event, element, view) {
-          // if event is a WORK event, link it to its DUE event
-          if ('target' in event) {
-            var target = $("#calendar").fullCalendar('clientEvents', event.target)[0];
-            if (target.workEvents.indexOf(event._id) === -1) { target.workEvents.push(event._id); } //push if does not exist
-          }
-          // TO DO: assign different color for each task type?
+          linkWorkToDue(event,element,view);
         },
 
         eventResize: function(event, delta, revertFunc) {
@@ -344,6 +347,39 @@ $(document).ready(function(){
                                 // it can only run after calendar exists
 })
 
+function eventPopup(event,jsEvent,view) {
+  if (event.isDue) {
+      console.log(event)
+      $('#event-detail-title').html(event.shortTitle);
+      $('#event-detail-type').html("<i>"+event.type+"</i>");
+      $('#event-detail-due').html(event.start.format());
+      $('#event-detail-given-estimate').html(event.givenEstimate);
+      $('#event-detail-calc-estimate').html(event.calcEstimate);
+      $('#event-detail-work').empty();
+      Object.keys(event.workEvents).forEach(function(id) {
+        var workEvent = $("#calendar").fullCalendar('clientEvents', id)[0];
+        var duration  = event.workEvents[id];
+
+        $('#event-detail-work').append(
+          $("<div>").html(duration + " hours on " + workEvent.start.format('ddd MM/DD'))
+        )
+      })
+
+      $('#event-detail-popup').addClass('active')
+    }
+}
+
+function linkWorkToDue(event,element,view) {
+  // if event is a WORK event, link it to its DUE event
+  if ('target' in event) {
+    var target = $("#calendar").fullCalendar('clientEvents', event.target)[0];
+    if (!(event._id in target.workEvents)) { target.workEvents[event._id] = event.givenEstimate; } //push if does not exist
+
+    // Update DUE event to represent hours put forth
+
+  }
+}
+
 // calcEstimate is how we provide users with our estimate for each task type
 // This function is called on document ready (see Global Data Types and Storage)
 // And builds the index of est`imate for every task type
@@ -380,7 +416,7 @@ function event(newEvent) {
 	this.start    = moment(newEvent.start); 
 	this.editable = true;
 
-	if (newEvent.duration !== undefined) // this is our flag indicating a due item or a work item
+	if (newEvent.givenEstimate !== undefined) // this is our flag indicating a due item or a work item
 		{ 
       this.allDay = true; 
       this.isDue  = true;
@@ -392,13 +428,14 @@ function event(newEvent) {
       this.givenEstimate  = parseFloat(newEvent.givenEstimate);
       this.actualDuration = newEvent.actualDuration;
 
-      this.workEvents = [];
+      this.workEvents = {};
 
       this.color = "#c1185b";
     }
 	else
 		{ 
       this.end   = moment(newEvent.finish);
+      this.givenEstimate = moment.duration(this.end.diff(this.start)).asHours();
       this.isDue = false;
       this.shortTitle = this.title;
       this.title = this.title;

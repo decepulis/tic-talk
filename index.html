@@ -16,6 +16,7 @@
     <script type="text/javascript" src="./fullcalendar/lib/moment.min.js"></script>
     <script type="text/javascript" src="./fullcalendar/fullcalendar.js"></script>
     <script type="text/javascript" src="./tictalk.js" \></script>
+    <meta name="description" content="Did you ever hear the tragedy of Darth Plagueis The Wise? I thought not. It’s not a story the Jedi would tell you. It’s a Sith legend. Darth Plagueis was a Dark Lord of the Sith, so powerful and so wise he could use the Force to influence the midichlorians to create life… He had such a knowledge of the dark side that he could even keep the ones he cared about from dying. The dark side of the Force is a pathway to many abilities some consider to be unnatural. He became so powerful… the only thing he was afraid of was losing his power, which eventually, of course, he did. Unfortunately, he taught his apprentice everything he knew, then his apprentice killed him in his sleep. Ironic. He could save others from death, but not himself." />
 </head>
 
 <body>
@@ -72,7 +73,7 @@
                 <div class="popup-content-row">
                     Task Type:
                     <div class="add-task-field" id="task-type-field" style="display:inline-block;white-space:nowrap;">
-                        <select onchange="updateTaskTypeDropdown();">
+                        <select onchange="updateTaskSchedulePopup();">
                             <option value="no-selection">Select...</option>
                             <option value="new-task-type">Add New Task Type</option>
                         </select>
@@ -85,7 +86,7 @@
                 <div class="popup-content-row">&nbsp;</div>
                 <div class="popup-content-row" id="task-estimate-calc-row">
                     Usually Takes:
-                    <i class="add-task-field" id="task-estimate-calc-field">0 Hours</i>
+                    <i class="add-task-field"><span id="task-estimate-calc-field">0</span> Hours</i>
                 </div>
                 <div class="popup-content-row">
                     Your Estimate:
@@ -101,7 +102,7 @@
                 <div class="popup-content-row">
                     Working on Which Assignment?
                     <div class="add-work-field" id="work-target-field" style="display:inline-block;white-space:nowrap;">
-                        <select onchange="updateWorkTargetDropdown();">
+                        <select onchange="updateWorkSchedulePopup();">
                             <option value="no-selection">Select...</option>
                             <option value="no-target">Not Working on an Assignment</option>
                         </select>
@@ -114,7 +115,7 @@
                 <div class="popup-content-row">&nbsp;</div>
                 <div class="popup-content-row">
                     Scheduled On:
-                    <input class="add-work-field" type="datetime-local" id="work-scheduled-for-field">
+                    <input class="add-work-field" type="datetime-local" id="work-scheduled-for-field" onchange="updateFromStartToUntil()">
                 </div>
                 <div class="popup-content-row">
                     Scheduled Until:
@@ -125,13 +126,17 @@
                     Duration:
                     <input class="add-work-field" type="number" min=0 id="work-estimate-given-field" placeholder="Hours" onchange="updateFromDurationToUntil()">
                 </div>
+                <div class="popup-content-row" id="work-estimate-scheduled-total-row">
+                    Work Scheduled So Far:
+                    <i class="add-work-field"><span id="work-estimate-scheduled-total-field">0</span> Hours</i>
+                </div>
                 <div class="popup-content-row" id="work-estimate-calc-total-row">
-                    Your Estimate (Total):
-                    <i class="add-work-field" id="work-estimate-calc-total-field">0 Hours</i>
+                    Your Estimate For Assignment:
+                    <i class="add-work-field"><span id="work-estimate-calc-total-field">0</span> Hours</i>
                 </div>
                 <div class="popup-content-row" id="work-estimate-given-total-row">
-                    Usually Takes (Total):
-                    <i class="add-work-field" id="work-estimate-given-total-field">0 Hours</i>
+                    Our Estimate For Assignment:
+                    <i class="add-work-field"><span id="work-estimate-given-total-field">0</span> Hours</i>
                 </div>
             </div>
             <div class="popup-footer">
@@ -154,8 +159,7 @@
             </div>
         </div>
     </div>
-
-    <div class="popup" id="event-detail-popup">
+    <div class="popup narrow" id="event-detail-popup">
         <div class="popup-overlay"></div>
         <div class="popup-container">
             <div class="popup-header" id="event-detail-title">
