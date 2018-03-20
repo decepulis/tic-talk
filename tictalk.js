@@ -12,6 +12,7 @@ function saveToLocalStorage(k,v) {
 }
 // this function gets string from localStorage and converts it into JSON
 function getFromLocalStorage(k) {
+  if (typeof k != "string") {k = JSON.stringify(k)}
   return JSON.parse(localStorage.getItem(k));
 }
 
@@ -215,14 +216,15 @@ function saveAddTaskDialogue() {
     { 
       if (target !== "no-target") // this indicates not "Not Working on a Task"
       {
-        var title = 'Calc HW'; // TO DO: use ID stored in target to get target task name
+        var targetEvent = $('#calendar').fullCalendar('clientEvents',target)[0]
+        var title = targetEvent.shortTitle;
       }
       else
       {
-        var title = $("#no-target-work-field").val(); // TO DO: add work name box and read it here
+        var title = $("#no-target-work-field").val(); 
       }
 
-      var newEvent = new event({title:title, start:start, finish:finish});
+      var newEvent = new event({title:title, start:start, finish:finish, target:target});
       addNewEvent(newEvent);
 
       closePopup();
@@ -272,12 +274,33 @@ $(document).ready(function(){
       	height: ($(window).height()-80),
 
         eventClick: function(event, jsEvent, view) {
-          console.log(event);
-          console.log(jsEvent);
-          console.log(view);
+          if (event.isDue) {
+            console.log(event)
+            $('#event-detail-title').html(event.shortTitle)
+            $('#event-detail-type').html(event.type)
+            $('#event-detail-due').html(event.start.format())
+            $('#event-detail-given-estimate').html(event.givenEstimate)
+            $('#event-detail-calc-estimate').html(event.calcEstimate)
+            $('#event-detail-work').empty()
+            event.workEvents.forEach(function(id) {
+              var workEvent = $("#calendar").fullCalendar('clientEvents', id)[0];
+              var duration  = moment.duration(workEvent.end.diff(workEvent.start)).hours();
+
+              $('#event-detail-work').append(
+                $("<div>").html(duration + " hours on " + workEvent.start.format('ddd MM/DD'))
+              )
+            })
+
+            $('#event-detail-popup').addClass('active')
+          }
         },
 
         eventRender: function(event, element, view) {
+          // if event is a WORK event, link it to its DUE event
+          if ('target' in event) {
+            var target = $("#calendar").fullCalendar('clientEvents', event.target)[0];
+            if (target.workEvents.indexOf(event._id) === -1) { target.workEvents.push(event._id); } //push if does not exist
+          }
           // TO DO: assign different color for each task type?
         },
 
@@ -345,17 +368,14 @@ function addNewEvent(eventToAdd) {
 }
 
 function isDueFilter(event) { return event.isDue }
+function hasIDFilter(event, id) { return (event.target === id) }
+function thisWeekFilter(event) { return moment().week() === event.start.week() }
 
 // ** GLOBAL DATA TYPES AND STORAGE ******************************* //
 calcEstimate = {};
 $(document).ready(buildCalcEstimateIndex)
 
 function event(newEvent) {
-
-  console.log(newEvent)
-  console.log(newEvent.duration)
-  console.log(typeof newEvent.duration)
-
 	this.title    = newEvent.title;
 	this.start    = moment(newEvent.start); 
 	this.editable = true;
@@ -364,18 +384,25 @@ function event(newEvent) {
 		{ 
       this.allDay = true; 
       this.isDue  = true;
+      this.shortTitle = this.title;
       this.title  = "DUE: " + this.title;
       this.type   = newEvent.type;
 
       this.calcEstimate   = parseFloat(getCalcEstimate(newEvent.type));
       this.givenEstimate  = parseFloat(newEvent.givenEstimate);
       this.actualDuration = newEvent.actualDuration;
+
+      this.workEvents = [];
+
+      this.color = "#c1185b";
     }
 	else
 		{ 
       this.end   = moment(newEvent.finish);
       this.isDue = false;
-      this.title = "WORK: " + this.title;
+      this.shortTitle = this.title;
+      this.title = this.title;
+      this.target = newEvent.target;
     }
 
   console.log("Created New Event:");
