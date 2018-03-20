@@ -211,6 +211,15 @@ body, html {
   font-weight: 400;
 }
 
+/** USER INFO *****************************************************/
+.basic-profile {
+
+}
+
+.bp-text {
+
+}
+
 /** BODY **********************************************************/
 .calendar-container {
   position: absolute;
@@ -226,4 +235,8 @@ body, html {
   left: 10px;
   right: 10px;
   top: 10px;
+}
+
+.small-image {
+  /*width: 20%;*/
 }
