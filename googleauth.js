@@ -11,7 +11,6 @@ var SCOPES = "https://www.googleapis.com/auth/calendar.readonly https://www.goog
 
 // Var containing info about the Google auth instance
 // Used to call gapi.auth2.GoogleAuth's methods
-// @todo - Might be bad to only do this once? I don't think so, but we'll find that out for sure later.
 var googleAuth;
 
 // Var containing info about the Google user of the Google auth instance
@@ -24,12 +23,12 @@ var basicProfile;
 // The calendar object's summary that Tic Talk uses
 var calSummary = "Tic Talk"
 
+// The calendar object's description that Tic Talk uses
+var calDescr = "Tic Talk is a web app for time management designed to help users get a better grasp on the work in their week. This calendar stores scheduled tasks and suggested work times with estimated durations." 
+
 // Variable used to store the Tic Talk Calendar id
 // Is set when either the calendar is created in the app or the calendar is found by the app to already exist
 var calId;
-
-// The calendar object's description that Tic Talk uses
-var calDescr = "Tic Talk is a web app for time management designed to help users get a better grasp on the work in their week. This calendar stores scheduled tasks and suggested work times with estimated durations." 
 
 /**
  *  On load, called to load the auth2 library and API client library.
@@ -96,7 +95,7 @@ function updateSigninStatus(isSignedIn) {
 } 
 
 // --------------------------------
-// Calendar Related Methods:
+// Calendar and Event Related Methods:
 // --------------------------------
 
 /**
@@ -112,11 +111,9 @@ function tictalkCalendarChecker() {
     // 2) Check if a Tic Talk-specific calendar exists yet
     var calFound = false; // Flag for if we find the user has a Tic Talk calendar
     // Iterate through each of the calendar objects
-    for (var i = 0; i < calendarList.length; i++)
-    {
+    for (var i = 0; i < calendarList.length; i++) {
       // Check the calendar's summary (and maybe description too) to see if it matches what we use for Tic Talk's calendar
-      if (calendarList[i].summary === calSummary && calendarList[i].description === calDescr)
-      {
+      if (calendarList[i].summary === calSummary && calendarList[i].description === calDescr) {
         calId = calendarList[i].id;
         console.log("DEBUG: Tic Talk calendar found in list of user's calendars. Calendar ID = " + calId + ".");
         calFound = true;
@@ -125,8 +122,7 @@ function tictalkCalendarChecker() {
     }
 
     // 3) If it doesn't exist, ask to create it (pop up a modal)
-    if (calFound !== true)
-    {
+    if (calFound !== true) {
       // display that popup and give them a button! 
       $('#create-calendar-popup').addClass('active');
       $('#create-calendar-button').click(handleCreateCalClick);
@@ -165,6 +161,88 @@ function deleteCalendar() {
   calId = null;
 };
 
+/**
+ * Creates an event in the Tic Talk calendar. 
+ * @param newEvent - Object containing details about the calendar event to be added. 
+ */
+function createEvent(newEvent) {
+  // Going to need event name, start time, duration, whether it's all day, and notes  
+  console.log("DEBUG: Trying to create an event. newEvent: " + JSON.stringify(newEvent));
+  var start;
+  var end;
+  // @todo: implement timeZone discovery in v2
+  // var timeZone = "America/New_York";
+  // Handling is the event is an all-day event
+  if (newEvent.allDay === true) {
+    // If it's all day, start and end need to be dates, not dateTimes
+    start = { 
+      "date": newEvent.start.format("YYYY-MM-DD")
+    };
+    end  = { 
+      "date": newEvent.start.format("YYYY-MM-DD")
+    };
+    console.log("DEBUG: Event is all day. Start = " + JSON.stringify(start) + ". End = " + JSON.stringify(end));
+  }
+  else {
+    // If it's all day, start and end need to be dateTimes, not dates
+    start = { 
+      "dateTime": newEvent.start.format()
+    };
+    end  = { 
+      "dateTime": newEvent.end.format()
+    };
+    console.log("DEBUG: Event is not all day. Start = " + JSON.stringify(start) + ". End = " + JSON.stringify(end));
+  }
+
+  var eventToAdd = {
+    'summary': newEvent.title,
+    // Where we have all the extra data that doesn't fit into a Google event object
+    'description': JSON.stringify(newEvent),
+    'start': start,
+    'end': end,
+    // Reminders is necessary?
+    'reminders': {
+      'useDefault': false
+    }
+  };
+
+  var eventRequest = gapi.client.calendar.events.insert({
+    "calendarId": calId,
+    "resource": eventToAdd
+  });
+
+  eventRequest.execute(function(event) {
+    console.log("DEBUG: Event added. Link: " + event.htmlLink);
+  });
+}
+
+/**
+ * Gets all the events in the Tic Talk calendar between a given start time and end time. 
+ * @param minDateTime - A datetime denoting when to start getting events from.
+ * @param maxDateTime - A datetime denoting when to stop getting events from.
+ * @returns A lost of the user's events between the two specified times.
+ */
+function getEvents(minDateTime, maxDateTime) {
+  console.log("DEBUG: Trying to get events from " + minDateTime + " to " + maxDateTime + ".");
+  gapi.client.calendar.events.list({
+    'calendarId': calId,
+    'timeMax': maxDateTime,
+    'timeMin': minDateTime,
+    'showDeleted': false,
+    'singleEvents': true,
+    'orderBy': 'startTime'
+  }).then(function(response) {
+    var events = response.result.items;
+    if (events.length > 0) {
+      console.log("DEBUG: Got events:");
+      console.log(events);
+    } else {
+      console.log("DEBUG: Could not find any events in the gotten events.");
+    }
+    return events;
+  });
+
+}
 
 // ---------------
 // Button Handlers
@@ -176,6 +254,7 @@ function deleteCalendar() {
 function handleSignInClick(event) {
   googleAuth.signIn();
   console.log("DEBUG: User has signed in.");
+  closePopup();
 }
 
 /**
@@ -184,19 +263,69 @@ function handleSignInClick(event) {
 function handleSignoutClick(event) {
   googleAuth.signOut();
   console.log("DEBUG: User has signed out.");
+  closePopup();
 }
 
 /**
  *  Create the Tic Talk calendar upon button click.
- *  @todo - Fill this out!
  */
 function handleCreateCalClick(event) {
   console.log("DEBUG: Button to create calendar clicked.");
-  // Call the calendar creation method here
   createCalendar();
+  closePopup();
 }
 
 
 // --------------------------------
 // Test Methods and Helper Methods:
 // --------------------------------
+
+/**
+ *  Test function to create several events to ensure event creation is working.
+ */
+function createEventTest() {
+  console.log("DEBUG: Testing event creation.");
+
+  // Event 1: Not an all-day event
+  var shortEvent = new event({
+    "title": "Short Event",
+    "start": moment(),
+    "target": "uhhhhh",
+    "actualDuration": 10
+  });
+
+  createEvent(shortEvent);
+
+  // Event 2: An all-day event
+  var allDayEvent = new event({
+    "title": "An All Day Event",
+    "start": moment(),
+    "type": "Calculus HW",
+    "givenEstimate": 2,
+    "actualDuration": 10
+  });
+
+  createEvent(allDayEvent);
+}
+
+/**
+ *  Test function to get all events in a given week.
+ *  You need to manually insert events into the calendar to test this event.
+ */
+function getEventsTest() {
+  minDT = "2018-03-25T00:00:00Z";
+  maxDT = "2018-04-01T00:00:00Z";
+  console.log("DEBUG: Testing event getting from " + minDT + " to " + maxDT);
+  getEvents(minDT, maxDT);
+}
+
+/**
+ *  Test function to get all events in a given week.
+ *  This one is testing a week without events, so there's no need to create events.
+ */
+function getEventsTest2() {
+  minDT = "2019-01-01T00:00:00Z";
+  maxDT = "2010-01-08T00:00:00Z";
+  console.log("DEBUG: Testing event getting from " + minDT + " to " + maxDT);
+  getEvents(minDT, maxDT);
+}
