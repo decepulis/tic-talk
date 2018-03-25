@@ -176,6 +176,7 @@ function deleteCalendar() {
 function handleSignInClick(event) {
   googleAuth.signIn();
   console.log("DEBUG: User has signed in.");
+  closePopup();
 }
 
 /**
@@ -184,6 +185,7 @@ function handleSignInClick(event) {
 function handleSignoutClick(event) {
   googleAuth.signOut();
   console.log("DEBUG: User has signed out.");
+  closePopup();
 }
 
 /**
@@ -194,6 +196,7 @@ function handleCreateCalClick(event) {
   console.log("DEBUG: Button to create calendar clicked.");
   // Call the calendar creation method here
   createCalendar();
+  closePopup();
 }
 
 
