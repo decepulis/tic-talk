@@ -117,6 +117,7 @@ function tictalkCalendarChecker() {
         calId = calendarList[i].id;
         console.log("DEBUG: Tic Talk calendar found in list of user's calendars. Calendar ID = " + calId + ".");
         calFound = true;
+        googleAuthCalFound();
         break;
       }
     }
@@ -222,7 +223,7 @@ function createEvent(newEvent) {
  * @param maxDateTime - A datetime denoting when to stop getting events from.
  * @returns A lost of the user's events between the two specified times.
  */
-function getEvents(minDateTime, maxDateTime) {
+function getEvents(minDateTime, maxDateTime, handleResponse) {
   console.log("DEBUG: Trying to get events from " + minDateTime + " to " + maxDateTime + ".");
   gapi.client.calendar.events.list({
     'calendarId': calId,
@@ -231,16 +232,7 @@ function getEvents(minDateTime, maxDateTime) {
     'showDeleted': false,
     'singleEvents': true,
     'orderBy': 'startTime'
-  }).then(function(response) {
-    var events = response.result.items;
-    if (events.length > 0) {
-      console.log("DEBUG: Got events:");
-      console.log(events);
-    } else {
-      console.log("DEBUG: Could not find any events in the gotten events.");
-    }
-    return events;
-  });
+  }).then(handleResponse);
 
 }
 

@@ -342,10 +342,66 @@ $(document).ready(function(){
 	        right: 'month,agendaWeek,agendaDay, prev,next'
 	     } 
     })
-
-  buildTaskSelectionDropdown(); // this needs to happen here becuase
-                                // it can only run after calendar exists
 })
+
+/* One call per week
+function googleAuthCalFound() {
+  var t0 = performance.now();
+  var start = moment().startOf('week');
+  var end   = moment().endOf('week');
+  getEvents(start.format(),end.format(),eventsReturned)
+  for (i= 1; i <= 52; i++) 
+  { 
+    // weeks ahead
+    var startAhead = start.clone().add(i,'weeks');
+    var endAhead   = end.clone().add(i,'weeks');
+    getEvents(startAhead.format(),endAhead.format(),eventsReturned)
+    // weeks behind
+    var startBehind = start.clone().subtract(i,'weeks');
+    var endBehind   = end.clone().subtract(i,'weeks');
+    getEvents(startBehind.format(),endBehind.format(),eventsReturned)
+  }
+}
+*/
+
+// One call total
+// performance testing indicates this is faster than one call per week
+function googleAuthCalFound() {
+  var start = moment().subtract(1,'year');
+  var end   = moment().add(1,'year');
+  getEvents(start.format(),end.format(),eventsReturned)
+}
+
+function eventsReturned(events) {
+  var events = events.result.items
+  if (events.length > 0) 
+  {
+    var renderEvents = [];
+    events.forEach(function(e){
+      try //try JSON parse; if it works, then it's a tictalk event
+      {
+        parsedEvent = JSON.parse(e.description)
+        renderEvents.push(parsedEvent);
+      }
+      catch (err) // if JSON parse fails, it's not a tictalk event
+      {
+        var calEvent = {
+          title: e.summary,
+          start: moment(e.start.dateTime),
+          end:   moment(e.end.dateTime),
+          color: '#f95688'
+        }
+        renderEvents.push(calEvent);
+      }
+    })
+
+    $('#calendar').fullCalendar('renderEvents', renderEvents, true);
+    $('#loading').removeClass('active')
+  }
+  else
+  {
+  }
+}
 
 function eventPopup(event,jsEvent,view) {
   if (event.isDue) {
@@ -400,7 +456,7 @@ function addNewEvent(eventToAdd) {
   $('#calendar').fullCalendar('render');
 
 	// 2. Add Event to Google Calendar
-	// TO DO
+  createEvent(eventToAdd);
 }
 
 function isDueFilter(event) { return event.isDue }
