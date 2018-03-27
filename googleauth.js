@@ -117,6 +117,7 @@ function tictalkCalendarChecker() {
         calId = calendarList[i].id;
         console.log("DEBUG: Tic Talk calendar found in list of user's calendars. Calendar ID = " + calId + ".");
         calFound = true;
+        googleAuthCalFound();
         break;
       }
     }

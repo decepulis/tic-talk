@@ -3,7 +3,17 @@ $(document).ready(function(){
 	console.log("DEBUG: Document Loaded")
 })
 
+// lil keypress handler for the escape key
+$(document).keydown(function(e){
+  if(e.keyCode == 27) {
+      $('.popup').each(function() {
+        $(this).removeClass('active');
+      });
+  }
+});
+
 // ** LOCALSTORAGE ***********************************************//
+/*
 // this function converts JSON into string to be entered into localStorage
 function saveToLocalStorage(k,v) {
   if (typeof k != "string") {k = JSON.stringify(k)}
@@ -15,26 +25,8 @@ function getFromLocalStorage(k) {
   if (typeof k != "string") {k = JSON.stringify(k)}
   return JSON.parse(localStorage.getItem(k));
 }
+*/
 
-$(document).ready(buildTaskTypesDropdown)
-function buildTaskTypesDropdown() {
-  // <select onchange="updateTaskTypeDropdown();">
-  var $select = $('#task-type-field>select');
-  $select.empty();
-  //    <option value="no-selection">Select...</option>
-  $('<option/>').attr('value',"no-selection").html("Select...").appendTo($select);
-
-  //    <option>Type</option>
-  var types = getFromLocalStorage('task-types');
-  if (types != null) 
-  {
-    types.forEach(function(type){
-      $('<option/>').html(type).appendTo($select)
-    })
-  }
-  //    <option>Add New Task Type</option>
-  $('<option/>').attr('value','new-task-type').html("Add New Task Type").appendTo($select);
-}
 
 // ** BUTTON BEHAVIOR ********************************************//
 $(document).ready(buildTaskTypesDropdown);
@@ -96,8 +88,8 @@ function updateWorkSchedulePopup() {
     $('#work-estimate-given-total-row').removeClass('textdisabled'); 
 
     // and update estimates based off of the selected due assignment
-    var target = $("#work-target-field>select").val();
-    var targetEvent = $('#calendar').fullCalendar('clientEvents',target)[0]
+    var targetHash = $("#work-target-field>select").val();
+    var targetEvent = $('#calendar').fullCalendar('clientEvents',function(e){return eventHasHash(e,targetHash)})[0]
     // cycle through all scheduled work and sum it all up
     var sum = parseFloat($('#work-estimate-given-field').val());
     Object.keys(targetEvent.workEvents).forEach(function(id) {
@@ -107,7 +99,6 @@ function updateWorkSchedulePopup() {
     $('#work-estimate-calc-total-field').html(targetEvent.calcEstimate);
     $('#work-estimate-given-total-field').html(targetEvent.givenEstimate);
   }
-
 }
 
 
@@ -115,8 +106,6 @@ function updateWorkSchedulePopup() {
 function updateFromUntilToDuration() {
   var start    = $("#work-scheduled-for-field").val();
   var until    = $("#work-scheduled-until-field").val();
-
-  console.log('From until to duration '+start+' '+until)
 
   if ((start !== "") && (until !== "")) 
   {
@@ -134,8 +123,6 @@ function updateFromDurationToUntil(){
   var start    = $("#work-scheduled-for-field").val();
   var duration = $("#work-estimate-given-field").val();
 
-  console.log('From duration to until '+start+' '+duration)
-
   if ((start !== "") && (duration !== "")) 
   {
     start    = moment(start);
@@ -151,6 +138,25 @@ function updateFromDurationToUntil(){
 
 function updateFromStartToUntil() {}
 
+function buildTaskTypesDropdown() {
+  // <select onchange="updateTaskTypeDropdown();">
+  var $select = $('#task-type-field>select');
+  $select.empty();
+  //    <option value="no-selection">Select...</option>
+  $('<option/>').attr('value',"no-selection").html("Select...").appendTo($select);
+
+  //    <option>Type</option>
+  var types = Object.keys(calcEstimates)
+  if ( types.length != 0 ) 
+  {
+    types.forEach(function(type){
+      $('<option/>').html(type).appendTo($select)
+    })
+  }
+  //    <option>Add New Task Type</option>
+  $('<option/>').attr('value','new-task-type').html("Add New Task Type").appendTo($select);
+}
+
 function buildTaskSelectionDropdown() {
   // <select onchange="updateWorkTargetDropdown();">
   var $select = $('#work-target-field>select');
@@ -162,7 +168,7 @@ function buildTaskSelectionDropdown() {
   if (types != null) 
   {
     types.forEach(function(type){
-      $('<option/>').attr('value',type._id).html(type.title).appendTo($select)
+      $('<option/>').attr('value',type.hash).html(type.title).appendTo($select)
     })
   }
   //    <option>Add New Task Type</option>
@@ -192,20 +198,19 @@ function saveAddTaskDialogue() {
     { 
       // create a new task type if we need to
       if ($('#task-type-field>select').val() === "new-task-type") {
-        var types = getFromLocalStorage('task-types');
-        if (types == null) { types = []; }
-
         var type = newType;
         // if type isn't already in array, add and save
+        var types = Object.keys(calcEstimates)
         if (types.indexOf(type) == -1) {
           types.push(type);
           types.sort();
-          saveToLocalStorage('task-types',types);
+          calcEstimates[type] = {'givenHistory':[givenEstimate],'calcHistory':[null],'actualHistory':[null], 'estimate':givenEstimate}
           buildTaskTypesDropdown();
         }
       } 
 
       var newEvent = new event({title: title, type:type, start:dueDate, givenEstimate:givenEstimate})
+      newEvent.hash = hash(JSON.stringify(newEvent));
       addNewEvent(newEvent);
       buildTaskSelectionDropdown();
 
@@ -241,7 +246,7 @@ function saveAddTaskDialogue() {
     { 
       if (target !== "no-target") // this indicates not "Not Working on a Task"
       {
-        var targetEvent = $('#calendar').fullCalendar('clientEvents',target)[0]
+        var targetEvent = $('#calendar').fullCalendar('clientEvents',function(e){return eventHasHash(e,target)})[0]
         var title = targetEvent.shortTitle;
       }
       else
@@ -250,6 +255,7 @@ function saveAddTaskDialogue() {
       }
 
       var newEvent = new event({title:title, start:start, finish:finish, target:target});
+      newEvent.hash = hash(JSON.stringify(newEvent));
       addNewEvent(newEvent);
 
       closePopup();
@@ -278,8 +284,8 @@ function clearAddTaskDialogue() {
   $('#new-task-type-row').addClass('hidden'); 
 
   $('#work-target-field>select').val("no-selection");
-  $("#work-scheduled-for-field").val(moment().format("YYYY-MM-DDTHH:mm"));
-  $("#work-scheduled-until-field").val(moment().add(1,'hours').format("YYYY-MM-DDTHH:mm"));
+  $("#work-scheduled-for-field").val(moment().startOf('hour').format("YYYY-MM-DDTHH:mm"));
+  $("#work-scheduled-until-field").val(moment().add(1,'hour').startOf('hour').format("YYYY-MM-DDTHH:mm"));
   $("#work-estimate-given-field").val("1");
   $('#work-estimate-scheduled-total-field').html("0"); // sum of all stuff
   $('#work-estimate-given-total-field').html("0");     // given estimate for all stuff
@@ -300,6 +306,7 @@ $(document).ready(function(){
       	height: ($(window).height()-80),
 
         eventClick: function(event, jsEvent, view) {
+          console.log(event)
           eventPopup(event,jsEvent,view);
         },
 
@@ -319,7 +326,13 @@ $(document).ready(function(){
           // clicking on a time adds an event at that time
           if (day.hasTime())
           {
-            console.log(day)
+            if (!(day._ambigTime))
+            {
+              $("#add-task-popup").addClass('active');
+              $('#schedule-work-radio').click();
+              $("#work-scheduled-for-field").val(day.format());
+              $("#work-scheduled-until-field").val(day.add(1,'hour').format());
+            }
           }
           else 
           {
@@ -342,23 +355,103 @@ $(document).ready(function(){
 	        right: 'month,agendaWeek,agendaDay, prev,next'
 	     } 
     })
-
-  buildTaskSelectionDropdown(); // this needs to happen here becuase
-                                // it can only run after calendar exists
 })
+
+/* One call per week
+function googleAuthCalFound() {
+  var t0 = performance.now();
+  var start = moment().startOf('week');
+  var end   = moment().endOf('week');
+  getEvents(start.format(),end.format(),eventsReturned)
+  for (i= 1; i <= 52; i++) 
+  { 
+    // weeks ahead
+    var startAhead = start.clone().add(i,'weeks');
+    var endAhead   = end.clone().add(i,'weeks');
+    getEvents(startAhead.format(),endAhead.format(),eventsReturned)
+    // weeks behind
+    var startBehind = start.clone().subtract(i,'weeks');
+    var endBehind   = end.clone().subtract(i,'weeks');
+    getEvents(startBehind.format(),endBehind.format(),eventsReturned)
+  }
+}
+*/
+
+// One call total
+// performance testing indicates this is faster than one call per week
+function googleAuthCalFound() {
+  var start = moment().subtract(1,'year');
+  var end   = moment().add(1,'year');
+  getEvents(start.format(),end.format(),eventsReturned)
+}
+
+function eventsReturned(events) {
+  var events = events.result.items
+  if (events.length > 0) 
+  {
+    var renderEvents = [];
+    events.forEach(function(e){
+      try //try JSON parse; if it works, then it's a tictalk event
+      {
+        parsedEvent = JSON.parse(e.description)
+        if ('end' in parsedEvent)
+        {
+          parsedEvent.start = moment(parsedEvent.start).local();
+          parsedEvent.end   = moment(parsedEvent.end).local();
+        }
+
+        renderEvents.push(parsedEvent);
+
+        if ('type' in parsedEvent) {
+          var type = parsedEvent.type
+          if (!(type in calcEstimates)) {
+            calcEstimates[type] = {'givenHistory': [], 'calcHistory':[], 'actualHistory':[], 'estimate': -1}
+          }
+          if ('givenEstimate'  in parsedEvent) { calcEstimates[type].givenHistory.push(parsedEvent.givenEstimate);   }
+          else                                 { calcEstimates[type].givenHistory.push(null);                        }
+          if ('calcEstimate'   in parsedEvent) { calcEstimates[type].calcHistory.push(parsedEvent.calcEstimate);     }
+          else                                 { calcEstimates[type].calcHistory.push(null);                         }
+          if ('actualDuration' in parsedEvent) { calcEstimates[type].actualHistory.push(parsedEvent.actualDuration); }
+          else                                 { calcEstimates[type].actualHistory.push(null);                       }
+        }
+      }
+      catch (err) // if JSON parse fails, it's not a tictalk event
+      {
+        var calEvent = {
+          title: e.summary,
+          start: moment(e.start.dateTime),
+          end:   moment(e.end.dateTime),
+          color: '#f95688',
+          editable: false
+        }
+        renderEvents.push(calEvent);
+      }
+    })
+
+    $('#calendar').fullCalendar('renderEvents', renderEvents, true);
+    $('#loading').removeClass('active');
+
+    calculateEstimates();
+
+    buildTaskSelectionDropdown();
+    buildTaskTypesDropdown();
+  }
+  else
+  {
+  }
+}
 
 function eventPopup(event,jsEvent,view) {
   if (event.isDue) {
-      console.log(event)
       $('#event-detail-title').html(event.shortTitle);
       $('#event-detail-type').html("<i>"+event.type+"</i>");
       $('#event-detail-due').html(event.start.format());
       $('#event-detail-given-estimate').html(event.givenEstimate);
       $('#event-detail-calc-estimate').html(event.calcEstimate);
       $('#event-detail-work').empty();
-      Object.keys(event.workEvents).forEach(function(id) {
-        var workEvent = $("#calendar").fullCalendar('clientEvents', id)[0];
-        var duration  = event.workEvents[id];
+      Object.keys(event.workEvents).forEach(function(eventHash) {
+        var workEvent = $('#calendar').fullCalendar('clientEvents',function(e){return eventHasHash(e,eventHash)})[0]
+        var duration  = event.workEvents[eventHash];
 
         $('#event-detail-work').append(
           $("<div>").html(duration + " hours on " + workEvent.start.format('ddd MM/DD'))
@@ -372,26 +465,43 @@ function eventPopup(event,jsEvent,view) {
 function linkWorkToDue(event,element,view) {
   // if event is a WORK event, link it to its DUE event
   if ('target' in event) {
-    var target = $("#calendar").fullCalendar('clientEvents', event.target)[0];
-    if (!(event._id in target.workEvents)) { target.workEvents[event._id] = event.givenEstimate; } //push if does not exist
+    var targetEvent = $('#calendar').fullCalendar('clientEvents',function(e){return eventHasHash(e,event.target)})[0]
+    if (!(event.hash in targetEvent.workEvents)) { targetEvent.workEvents[event.hash] = event.givenEstimate; } //push if does not exist
 
     // Update DUE event to represent hours put forth
 
   }
 }
 
-// calcEstimate is how we provide users with our estimate for each task type
-// This function is called on document ready (see Global Data Types and Storage)
-// And builds the index of est`imate for every task type
-function buildCalcEstimateIndex() {
-}
-
 // And here's a simple get function! Hey!
 function getCalcEstimate(type) {
-	var hours = -1; // placeholder functionality
-
-	return hours;
+  if (type in calcEstimates) 
+  {
+    return calcEstimates[type].estimate;
+  } 
+  else 
+  {
+    return -1
+  }
 }
+
+
+// this algorithm is bogus. Please rewrite soon.
+function calculateEstimates() {
+  for (type in calcEstimates) {
+    var givenSum  = calcEstimates[type].givenHistory.sum();
+    var calcSum   = calcEstimates[type].calcHistory.sum();
+    var actualSum = calcEstimates[type].actualHistory.sum();
+
+    var length = calcEstimates[type].givenHistory.length;
+
+    calcEstimates[type].estimate = (givenSum + calcSum + actualSum)/(length*3)
+  }
+}
+
+Array.prototype.sum = function() {
+    return this.reduce(function(a,b){return a+b;});
+};
 
 
 function addNewEvent(eventToAdd) {
@@ -400,12 +510,13 @@ function addNewEvent(eventToAdd) {
   $('#calendar').fullCalendar('render');
 
 	// 2. Add Event to Google Calendar
-	// TO DO
+  createEvent(eventToAdd);
 }
 
 function isDueFilter(event) { return event.isDue }
 function hasIDFilter(event, id) { return (event.target === id) }
 function thisWeekFilter(event) { return moment().week() === event.start.week() }
+function eventHasHash(event,hash) { return event.hash == hash }
 function hash(s) {
     /* Simple hash function. */
     var a = 1, c = 0, h, o;
@@ -423,8 +534,7 @@ function hash(s) {
 };
 
 // ** GLOBAL DATA TYPES AND STORAGE ******************************* //
-calcEstimate = {};
-$(document).ready(buildCalcEstimateIndex)
+calcEstimates = {}; // {type:estimateinfo}
 
 function event(newEvent) {
 	this.title    = newEvent.title;
@@ -441,7 +551,7 @@ function event(newEvent) {
 
       this.calcEstimate   = parseFloat(getCalcEstimate(newEvent.type));
       this.givenEstimate  = parseFloat(newEvent.givenEstimate);
-      this.actualDuration = newEvent.actualDuration;
+      this.actualDuration = null;
 
       this.workEvents = {};
 
