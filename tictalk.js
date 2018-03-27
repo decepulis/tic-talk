@@ -168,7 +168,7 @@ function buildTaskSelectionDropdown() {
   if (types != null) 
   {
     types.forEach(function(type){
-      $('<option/>').attr('value',type.hash).html(type.title).appendTo($select)
+      if (type.actualDuration == null) { $('<option/>').attr('value',type.hash).html(type.title).appendTo($select) }
     })
   }
   //    <option>Add New Task Type</option>
@@ -298,7 +298,7 @@ function saveEventDetail(event){
   if ($('#event-detail-completed').is(':checked'))
   {
     var duration = $('#event-detail-completed-duration').val();
-    event.actualDuration = duration;
+    event.actualDuration = parseFloat(duration);
     event.title = "DONE: " + event.shortTitle;
     event.color = "#708090"
 
@@ -311,9 +311,11 @@ function saveEventDetail(event){
     event.color = "#c1185b"
   }
 
-  console.log(event)
+  // update relevant views
   $("#calendar").fullCalendar('updateEvent', event);
   updateEvent(event); // update in Google Calendar
+  buildTaskSelectionDropdown()
+  buildCalcIndex()
 
   closePopup();
 }
@@ -322,7 +324,7 @@ function saveWorkDetail(event){
   if ($('#work-detail-completed').is(':checked'))
   {
     var duration = $('#work-detail-completed-duration').val();
-    event.actualDuration = duration;
+    event.actualDuration = parseFloat(duration);
     event.title = "DONE: " + event.shortTitle;
     event.color = "#778899"
   } 
@@ -443,20 +445,6 @@ function eventsReturned(events) {
         }
 
         renderEvents.push(parsedEvent);
-
-        // let's start building our calc estimation index
-        if ('type' in parsedEvent) {
-          var type = parsedEvent.type
-          if (!(type in calcEstimates)) {
-            calcEstimates[type] = {'givenHistory': [], 'calcHistory':[], 'actualHistory':[], 'estimate': -1}
-          }
-          if ('givenEstimate'  in parsedEvent) { calcEstimates[type].givenHistory.push(parsedEvent.givenEstimate);   }
-          else                                 { calcEstimates[type].givenHistory.push(null);                        }
-          if ('calcEstimate'   in parsedEvent) { calcEstimates[type].calcHistory.push(parsedEvent.calcEstimate);     }
-          else                                 { calcEstimates[type].calcHistory.push(null);                         }
-          if ('actualDuration' in parsedEvent) { calcEstimates[type].actualHistory.push(parsedEvent.actualDuration); }
-          else                                 { calcEstimates[type].actualHistory.push(null);                       }
-        }
       }
       catch (err) // if JSON parse fails, it's not a tictalk event
       {
@@ -474,8 +462,7 @@ function eventsReturned(events) {
     $('#calendar').fullCalendar('renderEvents', renderEvents, true);
     $('#loading').removeClass('active');
 
-    calculateEstimates();
-
+    buildCalcIndex();
     buildTaskSelectionDropdown();
     buildTaskTypesDropdown();
   }
@@ -581,18 +568,40 @@ function getCalcEstimate(type) {
   }
 }
 
+function buildCalcIndex() {
+  calcEstimates = {}
+  var allEvents = $('#calendar').fullCalendar('clientEvents',isDueFilter);
+  allEvents.forEach(function(e) { 
+    addToIndex(e);
+  })
+  
+  Object.keys(calcEstimates).forEach(function(type) {
+    calculateEstimatesFor(type);
+  })
+}
+
+function addToIndex(event) {
+  var type = event.type
+  if (!(type in calcEstimates)) {
+      calcEstimates[type] = {'givenHistory': [], 'calcHistory':[], 'actualHistory':[], 'estimate': -1}
+    }
+    if ('givenEstimate'  in parsedEvent) { calcEstimates[type].givenHistory.push(event.givenEstimate);   }
+    else                                 { calcEstimates[type].givenHistory.push(null);                  }
+    if ('calcEstimate'   in parsedEvent) { calcEstimates[type].calcHistory.push(event.calcEstimate);     }
+    else                                 { calcEstimates[type].calcHistory.push(null);                   }
+    if ('actualDuration' in parsedEvent) { calcEstimates[type].actualHistory.push(event.actualDuration); }
+    else                                 { calcEstimates[type].actualHistory.push(null);                 }
+}
 
 // this algorithm is bogus. Please rewrite soon.
-function calculateEstimates() {
-  for (type in calcEstimates) {
-    var givenSum  = calcEstimates[type].givenHistory.sum();
-    var calcSum   = calcEstimates[type].calcHistory.sum();
-    var actualSum = calcEstimates[type].actualHistory.sum();
+function calculateEstimatesFor(type) {
+  var givenSum  = calcEstimates[type].givenHistory.sum();
+  var calcSum   = calcEstimates[type].calcHistory.sum();
+  var actualSum = calcEstimates[type].actualHistory.sum();
 
-    var length = calcEstimates[type].givenHistory.length;
+  var length = calcEstimates[type].givenHistory.length;
 
-    calcEstimates[type].estimate = (givenSum + calcSum + actualSum)/(length*3)
-  }
+  calcEstimates[type].estimate = (givenSum + calcSum + actualSum)/(length*3)
 }
 
 Array.prototype.sum = function() {
@@ -616,6 +625,8 @@ function updateEvent(eventToUpdate) {
 
 function isDueFilter(event) { return event.isDue }
 function hasIDFilter(event, id) { return (event.target === id) }
+function isTypeFilter(event, type) { return (event.type === type)}
+function isTicTalkFilter(event) { return ('shortTitle' in event)}
 function thisWeekFilter(event) { return moment().week() === event.start.week() }
 function eventHasHash(event,hash) { return event.hash == hash }
 
@@ -632,7 +643,7 @@ function hash(s) {
             a = c!==0?a^c>>21:a;
         }
     }
-    return String(a);
+    return String(a + moment().unix());
 };
 
 // ** GLOBAL DATA TYPES AND STORAGE ******************************* //
