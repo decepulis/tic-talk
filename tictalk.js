@@ -715,7 +715,7 @@ function hash(s) {
             a = c!==0?a^c>>21:a;
         }
     }
-    return String(a);
+    return String(a + moment().unix());
 };
 
 // ** GLOBAL DATA TYPES AND STORAGE ******************************* //

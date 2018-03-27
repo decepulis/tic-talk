@@ -176,22 +176,14 @@ function createEvent(newEvent) {
   // Handling is the event is an all-day event
   if (newEvent.allDay === true) {
     // If it's all day, start and end need to be dates, not dateTimes
-    start = { 
-      "date": newEvent.start.format("YYYY-MM-DD")
-    };
-    end  = { 
-      "date": newEvent.start.format("YYYY-MM-DD")
-    };
+    start = {"date": newEvent.start.format("YYYY-MM-DD")};
+    end  = {"date": newEvent.start.format("YYYY-MM-DD")};
     console.log("DEBUG: Event is all day. Start = " + JSON.stringify(start) + ". End = " + JSON.stringify(end));
   }
   else {
     // If it's all day, start and end need to be dateTimes, not dates
-    start = { 
-      "dateTime": newEvent.start.format()
-    };
-    end  = { 
-      "dateTime": newEvent.end.format()
-    };
+    start = {"dateTime": newEvent.start.format()};
+    end  = {"dateTime": newEvent.end.format()};
     console.log("DEBUG: Event is not all day. Start = " + JSON.stringify(start) + ". End = " + JSON.stringify(end));
   }
 
@@ -248,6 +240,68 @@ function deleteEvent(eventId) {
     "eventId": eventId
   });
 
+/**
+ * Updates an event in the Tic Talk calendar. 
+ * @param updatedEvent - Object containing details about the calendar event to be added. 
+ */
+function updateEvent(updatedEvent) {
+  // Going to need event name, start time, duration, whether it's all day, and notes  
+  console.log("DEBUG: Trying to update an event where eventId = " + updatedEvent.hash + ". updatedEvent: "+ JSON.stringify(updatedEvent));
+  var start;
+  var end;
+  // @todo: implement timeZone discovery in v2
+  // var timeZone = "America/New_York";
+  // Handling is the event is an all-day event
+  if (updatedEvent.allDay === true) {
+    // If it's all day, start and end need to be dates, not dateTimes
+    start = {"date": updatedEvent.start.format("YYYY-MM-DD")};
+    end  = {"date": updatedEvent.start.format("YYYY-MM-DD")};
+    console.log("DEBUG: Event is all day. Start = " + JSON.stringify(start) + ". End = " + JSON.stringify(end));
+  }
+  else {
+    // If it's all day, start and end need to be dateTimes, not dates
+    start = {"dateTime": updatedEvent.start.format()};
+    end  = {"dateTime": updatedEvent.end.format()};
+    console.log("DEBUG: Event is not all day. Start = " + JSON.stringify(start) + ". End = " + JSON.stringify(end));
+  }
+
+  var eventToUpdate = {
+    'summary': updatedEvent.title,
+    'id': updatedEvent.hash,
+    // Where we have all the extra data that doesn't fit into a Google event object
+    'description': JSON.stringify(updatedEvent),
+    'start': start,
+    'end': end,
+    // Reminders is necessary?
+    'reminders': {
+      'useDefault': false
+    }
+  };
+
+  var eventRequest = gapi.client.calendar.events.update({
+    "calendarId": calId,
+    "eventId": updatedEvent.hash,
+    "resource": eventToUpdate
+  });
+
+  eventRequest.execute(function(event) {
+    console.log("DEBUG: Event updated. Link: " + event.htmlLink);
+  });
+}
+
+
+/**
+ * Deletes an event in the Tic Talk calendar, given an event id. 
+ * @param eventId - The id of the event to be deleted.
+ */
+function deleteEvent(eventId) {
+  console.log("DEBUG: Trying to delete events where eventId = " + eventId + ".");
+  var delRequest = gapi.client.calendar.events.delete({
+    "calendarId": calId,
+    "eventId": eventId
+  });
+
+>>>>>>> origin/stefan-dev
   delRequest.execute(function(event) {
     console.log("DEBUG: Event deleted where eventId = " + eventId + ".");
   });
@@ -315,6 +369,36 @@ function createEventTest() {
   });
 
   createEvent(allDayEvent);
+}
+
+/**
+ *  Test function to create several events to ensure event creation is working.
+ *  Have to run createEvent first and then pass this event the ids from those
+ *  created events.
+ */
+function updateEventTest(firstId, secondId) {
+  console.log("DEBUG: Testing event creation.");
+
+  // Short event to update
+  var shortEventUpdate = new event({
+    "title": "Short Event Updated",
+    "start": moment(),
+    "target": "uhhhhh",
+    "actualDuration": 3
+  });
+  shortEventUpdate.hash = firstId;
+  updateEvent(shortEventUpdate);
+
+  // All-day event to update
+  var allDayEventUpdate = new event({
+    "title": "An All Day Event Updated",
+    "start": moment(),
+    "type": "Calculus HW",
+    "givenEstimate": 2,
+    "actualDuration": 3
+  });
+  allDayEventUpdate.hash = secondId;
+  updateEvent(allDayEventUpdate);
 }
 
 /**
