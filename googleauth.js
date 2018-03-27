@@ -189,7 +189,7 @@ function createEvent(newEvent) {
 
   var eventToAdd = {
     'summary': newEvent.title,
-    'id': newEvent.hash,
+    'id':newEvent.hash,
     // Where we have all the extra data that doesn't fit into a Google event object
     'description': JSON.stringify(newEvent),
     'start': start,
@@ -214,7 +214,8 @@ function createEvent(newEvent) {
  * Gets all the events in the Tic Talk calendar between a given start time and end time. 
  * @param minDateTime - A datetime denoting when to start getting events from.
  * @param maxDateTime - A datetime denoting when to stop getting events from.
- * @param handleResponse - a function that takes in response and handles it.
+ * @param handleResponse - A javascript function that will be called with the calendar response
+ * @returns A lost of the user's events between the two specified times.
  */
 function getEvents(minDateTime, maxDateTime, handleResponse) {
   console.log("DEBUG: Trying to get events from " + minDateTime + " to " + maxDateTime + ".");
@@ -227,6 +228,17 @@ function getEvents(minDateTime, maxDateTime, handleResponse) {
     'orderBy': 'startTime'
   }).then(handleResponse);
 }
+
+/**
+ * Deletes an event in the Tic Talk calendar, given an event id. 
+ * @param eventId - The id of the event to be deleted.
+ */
+function deleteEvent(eventId) {
+  console.log("DEBUG: Trying to delete events where eventId = " + eventId + ".");
+  var delRequest = gapi.client.calendar.events.delete({
+    "calendarId": calId,
+    "eventId": eventId
+  });
 
 /**
  * Updates an event in the Tic Talk calendar. 
@@ -289,6 +301,7 @@ function deleteEvent(eventId) {
     "eventId": eventId
   });
 
+>>>>>>> origin/stefan-dev
   delRequest.execute(function(event) {
     console.log("DEBUG: Event deleted where eventId = " + eventId + ".");
   });

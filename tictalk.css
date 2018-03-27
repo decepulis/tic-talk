@@ -59,6 +59,12 @@ body, html {
 .textdisabled {
   color: rgba(0,0,0,0.33);
 }
+input[type="number"] {
+  width: 60px;
+}
+input[type="number"]:disabled {
+    background: #dddddd;
+}
 
 /** HEADER **********************************************************/
 .header {
