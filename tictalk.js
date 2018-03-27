@@ -406,6 +406,21 @@ function addNewEvent(eventToAdd) {
 function isDueFilter(event) { return event.isDue }
 function hasIDFilter(event, id) { return (event.target === id) }
 function thisWeekFilter(event) { return moment().week() === event.start.week() }
+function hash(s) {
+    /* Simple hash function. */
+    var a = 1, c = 0, h, o;
+    if (s) {
+        a = 0;
+        /*jshint plusplus:false bitwise:false*/
+        for (h = s.length - 1; h >= 0; h--) {
+            o = s.charCodeAt(h);
+            a = (a<<6&268435455) + o + (o<<14);
+            c = a & 266338304;
+            a = c!==0?a^c>>21:a;
+        }
+    }
+    return String(a + moment().unix());
+};
 
 // ** GLOBAL DATA TYPES AND STORAGE ******************************* //
 calcEstimate = {};
@@ -442,6 +457,5 @@ function event(newEvent) {
       this.target = newEvent.target;
     }
 
-  console.log("Created New Event:");
-  console.log(this)
+	this.hash = hash(JSON.stringify(this));
 }
