@@ -36,8 +36,18 @@
 		</div>
         <div class="header-button button" title="Add To-Do" id="add-task" data-popup="#add-task-popup">+</div>
         <div class="header-button button" title="Schedule This Week" id="schedule-week" data-popup="#schedule-week-popup">
-			<i class="material-icons">format_list_numbered</i>
+			<img class="material-icons" width=20 height=20 src="./favicons/_src/TTsmall-mask.png">
 		</div>
+    </div>
+
+    <div class="calendar-container">
+        <div id="calendar"></div>
+    </div>
+
+    <div id="loading" class="active">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
     </div>
 	
 	<div class="popup" id="account-popup">
@@ -169,15 +179,19 @@
             </div>
         </div>
     </div>
+
     <div class="popup narrow" id="event-detail-popup">
         <div class="popup-overlay"></div>
         <div class="popup-container">
             <div class="popup-header" id="event-detail-title">
+                Title
             </div>
             <div class="popup-content">
               <div class="popup-content-row" id="event-detail-type">
+                Type
               </div>
               <div class="popup-content-row" id="event-detail-due">
+                Due
               </div>
               <div class="popup-content-row">
                 Usually Takes:&nbsp;
@@ -187,11 +201,59 @@
                 Your Estimate:&nbsp;
                  <i id="event-detail-given-estimate"></i>
               </div>
+              <div class="popup-content-row">&nbsp;</div>
+              <div class="popup-content-row">
+                  <input id="event-detail-completed" type="checkbox" onchange="eventDetailCheckbox()">
+                  <label for="event-detail-completed">Work Complete</label>
+              </div>
+              <div class="popup-content-row">
+                  <input id="event-detail-completed-duration" type="number" placeholder="Hours" min="0">
+                  <label for="event-detail-completed-duration">Actual Hours Spent</label>
+              </div>
+              <div class="popup-content-row">&nbsp;</div>
               <div class="popup-content-row" id="event-detail-work">
               </div>
             </div>
             <div class="popup-footer">
-                <div class="textbutton button" onclick="closePopup();">CLOSE</div>
+                <div class="textbutton button" id="event-detail-savebutton">SAVE</div>
+                <div class="textbutton button" onclick="closePopup();">CANCEL</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="popup narrow" id="work-detail-popup">
+        <div class="popup-overlay"></div>
+        <div class="popup-container">
+            <div class="popup-header" id="work-detail-title">
+                Title
+            </div>
+            <div class="popup-content">
+                <div class="popup-content-row">
+                    <span id="work-detail-start"> 
+                        Start
+                    </span>
+                    &ndash;
+                    <span id="work-detail-end">  
+                        End
+                    </span>
+                </div>
+                <div class="popup-content-row">&nbsp;</div>
+              <div class="popup-content-row">
+                Working on: <div class="fc-event"  style="background-color:#c1185b" id="work-detail-target">Target</div>
+              </div>
+              <div class="popup-content-row">&nbsp;</div>
+              <div class="popup-content-row">
+                <input id="work-detail-completed" type="checkbox" onchange="workDetailCheckbox()">
+                <label for="work-detail-completed">Work Complete</label>
+              </div>
+              <div class="popup-content-row">
+                <label for="work-detail-completed-duration">Actual Hours Spent</label>
+                <input id="work-detail-completed-duration" type="number" placeholder="Hours" min="0">
+              </div>
+            </div>
+            <div class="popup-footer">
+                <div class="textbutton button" id="work-detail-savebutton">SAVE</div>
+                <div class="textbutton button" onclick="closePopup();">CANCEL</div>
             </div>
         </div>
     </div>
@@ -236,16 +298,6 @@
         		<div class="textbutton button" onclick="closePopup();">CANCEL</div>
         	</div>
     	</div>
-    </div>
-
-    <div id="loading" class="active">
-        <div class="bounce1"></div>
-        <div class="bounce2"></div>
-        <div class="bounce3"></div>
-    </div>
-
-    <div class="calendar-container">
-        <div id="calendar"></div>
     </div>
 </body>
 

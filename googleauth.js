@@ -197,6 +197,7 @@ function createEvent(newEvent) {
 
   var eventToAdd = {
     'summary': newEvent.title,
+    'id':newEvent.hash,
     // Where we have all the extra data that doesn't fit into a Google event object
     'description': JSON.stringify(newEvent),
     'start': start,
@@ -221,6 +222,7 @@ function createEvent(newEvent) {
  * Gets all the events in the Tic Talk calendar between a given start time and end time. 
  * @param minDateTime - A datetime denoting when to start getting events from.
  * @param maxDateTime - A datetime denoting when to stop getting events from.
+ * @param handleResponse - A javascript function that will be called with the calendar response
  * @returns A lost of the user's events between the two specified times.
  */
 function getEvents(minDateTime, maxDateTime, handleResponse) {
