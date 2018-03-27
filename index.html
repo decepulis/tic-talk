@@ -170,11 +170,25 @@
         <div class="popup-overlay"></div>
         <div class="popup-container">
             <div class="popup-header">
-                Plan Your Week
+                Schedule Your Time
             </div>
-            <div class="popup-content"></div>
+            <div class="popup-content">
+                <div class="popup-content-row"> 
+                    Schedule From: 
+                    <input type="date" id="schedule-week-from" onchange="populateScheduleWeekList()">
+                </div>
+                <div class="popup-content-row">
+                    Schedule To:
+                    <input type="date" id="schedule-week-to" onchange="populateScheduleWeekList()">
+                </div>
+                <div class="popup-content-row">&nbsp;</div>
+                <div class="popup-content-row"> Pick Tasks to Schedule: </div>
+                <div id="schedule-week-list">
+
+                </div>
+            </div>
             <div class="popup-footer">
-                <div class="textbutton button" onclick="closePopup();">SAVE</div>
+                <div class="textbutton button" onclick="closePopup();">SCHEDULE</div>
                 <div class="textbutton button" onclick="closePopup();">CANCEL</div>
             </div>
         </div>
@@ -212,6 +226,11 @@
               </div>
               <div class="popup-content-row">&nbsp;</div>
               <div class="popup-content-row" id="event-detail-work">
+              </div>
+                
+              <div class="popup-content-row">&nbsp;</div>
+              <div class="popup-content-row">
+                <div class="textbutton button destructive" id="event-detail-delete">DELETE ASSIGNMENT</div>
               </div>
             </div>
             <div class="popup-footer">
@@ -251,6 +270,10 @@
                 <input id="work-detail-completed-duration" type="number" placeholder="Hours" min="0">
               </div>
             </div>
+            <div class="popup-content-row">&nbsp;</div>
+              <div class="popup-content-row">
+                <div class="textbutton button destructive" id="work-detail-delete">DELETE WORK EVENT</div>
+              </div>
             <div class="popup-footer">
                 <div class="textbutton button" id="work-detail-savebutton">SAVE</div>
                 <div class="textbutton button" onclick="closePopup();">CANCEL</div>
