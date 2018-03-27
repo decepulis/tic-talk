@@ -629,7 +629,6 @@ function isTypeFilter(event, type) { return (event.type === type)}
 function isTicTalkFilter(event) { return ('shortTitle' in event)}
 function thisWeekFilter(event) { return moment().week() === event.start.week() }
 function eventHasHash(event,hash) { return event.hash == hash }
-
 function hash(s) {
     /* Simple hash function. */
     var a = 1, c = 0, h, o;

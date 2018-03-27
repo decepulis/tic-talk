@@ -235,7 +235,22 @@ function getEvents(minDateTime, maxDateTime, handleResponse) {
     'singleEvents': true,
     'orderBy': 'startTime'
   }).then(handleResponse);
+}
 
+/**
+ * Deletes an event in the Tic Talk calendar, given an event id. 
+ * @param eventId - The id of the event to be deleted.
+ */
+function deleteEvent(eventId) {
+  console.log("DEBUG: Trying to delete events where eventId = " + eventId + ".");
+  var delRequest = gapi.client.calendar.events.delete({
+    "calendarId": calId,
+    "eventId": eventId
+  });
+
+  delRequest.execute(function(event) {
+    console.log("DEBUG: Event deleted where eventId = " + eventId + ".");
+  });
 }
 
 // ---------------
@@ -303,6 +318,19 @@ function createEventTest() {
 }
 
 /**
+ *  Helper function used in testing event gets.
+ */
+function getEventsHandleResponse(response) {
+  var events = response.result.items;
+  if (events.length > 0) {
+    console.log("DEBUG: Got events:");
+    console.log(events);
+  } else {
+    console.log("DEBUG: Could not find any events in the gotten events.");
+  }
+}
+
+/**
  *  Test function to get all events in a given week.
  *  You need to manually insert events into the calendar to test this event.
  */
@@ -310,7 +338,7 @@ function getEventsTest() {
   minDT = "2018-03-25T00:00:00Z";
   maxDT = "2018-04-01T00:00:00Z";
   console.log("DEBUG: Testing event getting from " + minDT + " to " + maxDT);
-  getEvents(minDT, maxDT);
+  getEvents(minDT, maxDT, getEventsHandleResponse);
 }
 
 /**
@@ -321,5 +349,28 @@ function getEventsTest2() {
   minDT = "2019-01-01T00:00:00Z";
   maxDT = "2010-01-08T00:00:00Z";
   console.log("DEBUG: Testing event getting from " + minDT + " to " + maxDT);
-  getEvents(minDT, maxDT);
+  getEvents(minDT, maxDT, getEventsHandleResponse);
+}
+
+/**
+ *  Helper function used in testing event deletes.
+ */
+function deleteEventsHandleResponse(response) {
+  var events = response.result.items;
+  if (events.length > 0) {
+    console.log("DEBUG: Got events:");
+    console.log(events);
+    deleteEvent(events[0].id);
+    console.log("DEBUG: Deleted events with id = " + events[0].id + ".");
+  } else {
+    console.log("DEBUG: Could not find any events to delete.");
+  }
+}
+
+/**
+ *  Test function to delete an event. Needs event getting to work.
+ *  Must manually create one event to be deleted in the given time span.
+ */
+function deleteEventTest(){
+getEvents("2018-03-25T00:00:00Z","2018-04-01T00:00:00Z", deleteEventsHandleResponse);
 }
