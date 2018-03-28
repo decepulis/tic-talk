@@ -239,12 +239,18 @@ function deleteEvent(eventId) {
     "calendarId": calId,
     "eventId": eventId
   });
+}
 
 /**
  * Updates an event in the Tic Talk calendar. 
  * @param updatedEvent - Object containing details about the calendar event to be added. 
  */
 function updateEvent(updatedEvent) {
+  // strip event of fullcalendar attributes that cause stringify problems and create clutter
+  delete updatedEvent.source;
+  delete updatedEvent._id;
+  delete updatedEvent.className;
+
   // Going to need event name, start time, duration, whether it's all day, and notes  
   console.log("DEBUG: Trying to update an event where eventId = " + updatedEvent.hash + ". updatedEvent: "+ JSON.stringify(updatedEvent));
   var start;
@@ -260,8 +266,8 @@ function updateEvent(updatedEvent) {
   }
   else {
     // If it's all day, start and end need to be dateTimes, not dates
-    start = {"dateTime": updatedEvent.start.format()};
-    end  = {"dateTime": updatedEvent.end.format()};
+    start = {"dateTime": updatedEvent.start.format(), "timeZone": "America/New_York"};
+    end  = {"dateTime": updatedEvent.end.format(), "timeZone": "America/New_York"};
     console.log("DEBUG: Event is not all day. Start = " + JSON.stringify(start) + ". End = " + JSON.stringify(end));
   }
 
@@ -301,7 +307,6 @@ function deleteEvent(eventId) {
     "eventId": eventId
   });
 
->>>>>>> origin/stefan-dev
   delRequest.execute(function(event) {
     console.log("DEBUG: Event deleted where eventId = " + eventId + ".");
   });
@@ -456,5 +461,5 @@ function deleteEventsHandleResponse(response) {
  *  Must manually create one event to be deleted in the given time span.
  */
 function deleteEventTest(){
-getEvents("2018-03-25T00:00:00Z","2018-04-01T00:00:00Z", deleteEventsHandleResponse);
+  getEvents("2018-03-25T00:00:00Z","2018-04-01T00:00:00Z", deleteEventsHandleResponse);
 }

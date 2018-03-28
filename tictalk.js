@@ -410,13 +410,21 @@ $(document).ready(function(){
         },
 
         eventResize: function(event, delta, revertFunc, jsEvent, ui, view ) {
-          // TO DO
-          console.log(event);
-
+          // 1. update self
+          event.givenEstimate += delta.asHours()
+          console.log('new event')
+          console.log(event)
+          $('#calendar').fullCalendar('updateEvent',event)
+          // 2. update in target event
+          var targetEvent = getEventForHash(event.target)
+          targetEvent.workEvents[event.hash] = event.givenEstimate;
+          // 3. update self and target in Google Calendar
+          updateEvent(event);
+          updateEvent(targetEvent);
         },
 
         eventDrop: function( event, delta, revertFunc, jsEvent, ui, view ) {
-          // TO DO
+          updateEvent(event);
         },
 
         dayClick: function(day, jsEvent, view) {
@@ -685,9 +693,6 @@ function addNewEvent(eventToAdd) {
 	$('#calendar').fullCalendar('renderEvent', eventToAdd, true);
 	// 2. Add Event to Google Calendar
   createEvent(eventToAdd);
-}
-
-function updateEvent(eventToUpdate) { 
 }
 
 function isDueFilter(event) { return event.isDue }
