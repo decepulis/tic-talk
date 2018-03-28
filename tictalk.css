@@ -258,6 +258,8 @@ input[type="number"]:disabled {
   left: 0;
   top: 0;
 
+  padding: 33% 0;
+
   background-color: rgba(139,0,50,0.5);
   text-align: center;
 
@@ -272,7 +274,6 @@ input[type="number"]:disabled {
   width: 18px;
   height: 18px;
 
-  margin-top: 50%;
   background-color: white;
 
   border-radius: 100%;

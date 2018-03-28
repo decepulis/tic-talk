@@ -62,18 +62,166 @@ function populateScheduleWeekList() {
   var scheduleStart = moment($('#schedule-week-from').val());
   var scheduleEnd   = moment($('#schedule-week-to').val()  );
 
-  var allTTEvents = $('#calendar').fullCalendar('clientEvents', isTicTalkFilter)
+  var allDueEvents = $('#calendar').fullCalendar('clientEvents', isDueFilter)
 
-  allTTEvents.forEach(function(event){
+  allDueEvents.forEach(function(event){
     if ((event.start >= scheduleStart))
     {
       var $row     = $('<div/>', {class: 'popup-content-row'});
-      $row.append($('<input/>', {type: 'checkbox',       id:  'cb ' + event.hash}))
-      $row.append($('<label/>', {text: event.shortTitle, for: 'cb ' + event.hash}))
+      $row.append($('<input/>', {type: 'checkbox',       id:  'cb-' + event.hash, 'data-id': event.hash}))
+      $row.append($('<label/>', {text: event.shortTitle, for: 'cb-' + event.hash}))
 
       $row.appendTo($list)
     }
   })
+}
+
+function scheduleWeek() {
+  // 1. scrape the scheduling window
+  toSchedule = []
+  $('#schedule-week-list').find('input').each(function () {
+    var $checkbox = $(this);
+    if ($checkbox.is(':checked'))
+    {
+      var eventID = $checkbox.attr('data-id')
+      var event = getEventForHash(eventID)
+      // calculate work completed
+      var workCompleted = 0;
+      Object.keys(event.workEvents).forEach(function(e) { workCompleted += event.workEvents[e]; })
+
+      toSchedule.push({
+        event: event,
+        timeRemaining: event.givenEstimate - workCompleted,
+      })
+    }
+  });
+
+  // 2. Schedule!
+  var schedulingWindows = [
+    {dayStarts: '10', dayEnds: '18', weekday: true},  // 8 hour weekday
+    {dayStarts: '8',  dayEnds: '10', weekday: true},  // weekday mornings
+    {dayStarts: '18', dayEnds: '20', weekday: true},  // weekday evenings
+    {dayStarts: '10', dayEnds: '18', weekday: false}, // 8 hour weekend
+    {dayStarts: '8',  dayEnds: '10', weekday: false},  // weekend mornings
+    {dayStarts: '18', dayEnds: '20', weekday: false},  // weekend evenings
+  ]
+
+  var scheduleBegins = moment($('#schedule-week-from').val()).startOf('day');
+  var scheduleEnds   = moment($('#schedule-week-to').val()  ).endOf('day')  ;
+  var days           = moment.duration(scheduleEnds.diff(scheduleBegins)).asDays();
+
+  // Scheduling begins:
+  // we go through each of the four scheduling windows, one-by-one
+  // filling it to the top before moving to the next one
+  for ( var w = 0; w < schedulingWindows.length; w++){
+    // we fill each day up to the top before moving to the next one
+    console.log("SCHEDULER: Filling Window " + w)
+    for (var d = 0; d < days; d++) {
+      var dayStarts  = schedulingWindows[w].dayStarts;
+      var dayEnds    = schedulingWindows[w].dayEnds;
+      var weekday    = schedulingWindows[w].weekday;
+
+      var day   = scheduleBegins.clone().add(d,'days');
+      var dayHasEvent = {};
+      dayStarts = day.clone().add(dayStarts, 'hours');
+      dayEnds   = day.clone().add(dayEnds  , 'hours');
+      console.log("SCHEDULER: Filling Day " + day.format())
+
+      var isWeekday = (day.isoWeekday() !== 6 && day.isoWeekday() !== 7)
+      if (isWeekday !== weekday) // if we're scheduling weekdays and it's a weekend or vv, continue
+      { 
+        console.log('SCHEDULER: But it does not match our window so we move on!')
+        continue 
+      }
+
+      var dayEvents = $('#calendar').fullCalendar('clientEvents',function(e) { return inDayNotAllDayFilter(e,day) } )
+      console.log(dayEvents)
+
+      // now we iterate through the day's gaps, filling them one-by-one
+      var nextDayEvent = 0;
+
+      var gapStart = dayStarts;
+      if ( dayEvents.length > 0 )
+        { var gapEnd = dayEvents[nextDayEvent].start.clone() }
+      else
+        { var gapEnd = dayEnds; }
+      while (true) 
+      {
+        console.log("SCHEDULER: Assessing gap " + gapStart.format() + " - " + gapEnd.format())
+        var gap = moment.duration(gapEnd.diff(gapStart)).asHours();
+        if (gap > 0.5) // if the gap is big enough, fill it!
+        {
+          // find the first available incomplete event and schedule it in
+          // TO DO: unless it's already been scheduled in the day.
+          var e = 0
+          var target = null;
+          for (e = 0; e < toSchedule.length; e++)
+          {
+            target = toSchedule[e];
+            var targetidx = e
+            console.log("SCHEDULER: Assessing event " + target.event.shortTitle + ": " + target.timeRemaining)
+            if (target.event.hash in dayHasEvent) { console.log("SCHEDULER: Day Has Event"); target = null; continue } // we already scheduled one of these here
+            //if (target.event.start.startOf('day') < day.clone().add(1,'day').startOf('day') ) { console.log("SCHEDULER: Event Past-Due"); target = null; continue } // the event is past-due. 
+            if (target.timeRemaining > 0)  { break } // found an event to schedule
+          }
+
+          var complete = true; 
+          for (c = 0; c < toSchedule.length; c++) { if (toSchedule[c].timeRemaining > 0) { complete = false }}
+
+          if (target !== null) 
+          {
+            console.log('SCHEDULER: Scheduling ' + target.event.shortTitle + ' in gap!');
+            // but we did find an event to schedule so here we are
+            var duration = Math.min(gap, 2); // we schedule max 2 hours
+            duration = Math.min(duration, target.timeRemaining) // and no longer than the estimate
+            var newEvent = new event({
+              title:  target.event.shortTitle,
+              start:  gapStart,
+              finish: gapStart.clone().add(duration,'hours'),
+              target: target.event.hash,
+              isDue:  false
+            })
+
+            addNewEvent(newEvent);
+
+            // prepare for next while iteration
+            dayHasEvent[target.event.hash] = true
+            toSchedule[targetidx].timeRemaining -= duration;
+            gapStart = gapStart.clone().add(duration,'hours');
+          }
+          else // target == null
+          { console.log("SCHEDULER: Breaking While Loop - target null"); break } // no events with time remaining!
+        }
+        else // gap isn't big enough
+        {
+          if ( dayEvents.length > nextDayEvent )
+            { var gapStart = dayEvents[nextDayEvent].end }
+          else
+            { console.log("SCHEDULER: Breaking While Loop - end of window"); break } // out of events in the day. Break!
+
+          nextDayEvent += 1;
+          if ( dayEvents.length > nextDayEvent )
+            { var gapEnd = dayEvents[nextDayEvent].start }
+          else
+            { var gapEnd = dayEnds } 
+
+          if (gapEnd <= gapStart) 
+            { console.log("SCHEDULER: Breaking While Loop - end of window"); break }
+
+          if (gapEnd >= dayEnds) 
+            { console.log("SCHEDULER: Breaking While Loop - end of window"); break }
+        }
+      }
+      if (complete) 
+      { console.log("SCHEDULER: Breaking Days For Loop - complete"); break } // no events with time remaining!
+    }
+
+    if (complete) 
+    { console.log("SCHEDULER: Breaking Windows For Loop - complete"); break } // no events with time remaining!
+  }
+
+  alert('Scheduling Complete!');
+  closePopup();
 }
 
 function switchAddItemContent(){
@@ -165,7 +313,7 @@ function updateFromDurationToUntil(){
 
     var until   = start.clone().add(duration,'hours').format("YYYY-MM-DDTHH:mm");
     $("#work-scheduled-until-field").val(until)
-  } 
+  }  
 
   updateWorkSchedulePopup();
 }
@@ -424,7 +572,10 @@ $(document).ready(function(){
         },
 
         eventDrop: function( event, delta, revertFunc, jsEvent, ui, view ) {
-          updateEvent(event);
+          // block dragging all-days to daily and vv.
+          if (( 'type' in event ) && (event.allDay == false)) { revertFunc() }
+          else if (!('type' in event) && (event.allDay)) { revertFunc() }
+          else { updateEvent(event); }
         },
 
         dayClick: function(day, jsEvent, view) {
@@ -551,8 +702,8 @@ function eventPopup(event,jsEvent,view) {
         .prop( "disabled", true );
     }
 
-    $('#event-detail-savebutton').click(function(){saveEventDetail(event)});
-    $('#event-detail-delete').click(function(){ deleteDueEvent(event) });
+    $('#event-detail-savebutton').off("click").click(function(){saveEventDetail(event)});
+    $('#event-detail-delete').off("click").click(function(){ deleteDueEvent(event) });
     $('#event-detail-popup').addClass('active')
   }
 
@@ -583,8 +734,8 @@ function eventPopup(event,jsEvent,view) {
         .prop( "disabled", true );
     }
 
-    $('#work-detail-savebutton').click(function(){saveWorkDetail(event)})
-    $('#work-detail-delete').click(function(){ deleteWorkEvent(event) });
+    $('#work-detail-savebutton').off("click").click(function(){saveWorkDetail(event)})
+    $('#work-detail-delete').off("click").click(function(){ deleteWorkEvent(event) });
     $('#work-detail-popup').addClass('active')
   }
 }
@@ -702,6 +853,7 @@ function isTicTalkFilter(event) { return ('shortTitle' in event)}
 function thisWeekFilter(event) { return moment().week() === event.start.week() }
 function isTicTalkInFuture(event) { return (('shortTitle' in event) && (event.start >= moment().startOf('day'))) }
 function eventHasHash(event,hash) { return event.hash == hash }
+function inDayNotAllDayFilter(event,day) { return (event.start.isSame(day, 'day') && !(event.allDay))}
 
 function getEventForHash(hash) {
   return $('#calendar').fullCalendar('clientEvents',function(e){return eventHasHash(e,hash)})[0]
