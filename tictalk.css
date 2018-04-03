@@ -227,13 +227,16 @@ input[type="number"]:disabled {
 }
 
 /** BODY **********************************************************/
-.calendar-container {
+.container {
   position: absolute;
   top: 60px; bottom: 0px; left: 0px; right: 0px;
   
-  max-width: 900px;
   margin: 0 auto;
   padding: 10px;
+}
+
+.container.calendar {
+  max-width: 900px;
 }
 
 #calendar {
