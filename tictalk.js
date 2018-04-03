@@ -69,7 +69,7 @@ function populateScheduleWeekList() {
     {
       var $row     = $('<div/>', {class: 'popup-content-row'});
       $row.append($('<input/>', {type: 'checkbox',       id:  'cb-' + event.hash, 'data-id': event.hash}))
-      $row.append($('<label/>', {text: event.shortTitle, for: 'cb-' + event.hash}))
+      $row.append($('<label/>', {text: event.start.format('MM/DD') + " " + event.shortTitle + " ("+event.givenEstimate+"h. )", for: 'cb-' + event.hash}))
 
       $row.appendTo($list)
     }
@@ -161,7 +161,7 @@ function scheduleWeek() {
             var targetidx = e
             console.log("SCHEDULER: Assessing event " + target.event.shortTitle + ": " + target.timeRemaining)
             if (target.event.hash in dayHasEvent) { console.log("SCHEDULER: Day Has Event"); target = null; continue } // we already scheduled one of these here
-            //if (target.event.start.startOf('day') < day.clone().add(1,'day').startOf('day') ) { console.log("SCHEDULER: Event Past-Due"); target = null; continue } // the event is past-due. 
+            //if (target.event.start < day ) { console.log("SCHEDULER: Event Past-Due"); target = null; continue } // the event is past-due. 
             if (target.timeRemaining > 0)  { break } // found an event to schedule
           }
 
@@ -548,6 +548,8 @@ $(document).ready(function(){
       	
       	height: ($(window).height()-80),
 
+        eventColor: '#3949ab',
+
         eventClick: function(event, jsEvent, view) {
           console.log(event)
           eventPopup(event,jsEvent,view);
@@ -908,6 +910,8 @@ function event(newEvent) {
       this.shortTitle = this.title;
       this.title = this.title;
       this.target = newEvent.target;
+
+      this.color = ''
     }
 
   if ( 'actualDuration' in newEvent) { this.actualDuration = newEvent.actualDuration; }
