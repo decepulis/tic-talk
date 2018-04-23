@@ -26,6 +26,7 @@ function notify(title,body,url) {
 }
 
 function scheduleWeek() {
+  console.log('schedule week')
   var title = "Tic Talk: Schedule your Week!";
   var body  = "Spend 5 minutes planning your week.";
   var url   = "http://localhost:8000/Library/Mobile%20Documents/com~apple~CloudDocs/SS18/Senior%20Design%202/tic-talk/index.html";
@@ -33,6 +34,7 @@ function scheduleWeek() {
 }
 
 function reflectDay() {
+  console.log('reflect day')
   var title = "Tic Talk: Reflect on your Day!";
   var body  = "How long did your work take today?";
   var url   = "http://localhost:8000/Library/Mobile%20Documents/com~apple~CloudDocs/SS18/Senior%20Design%202/tic-talk/index.html";
